@@ -26,6 +26,8 @@ type UDPClient struct {
 
 var clients map[string]*UDPClient = make(map[string]*UDPClient)
 
+var ClientsMutex sync.Mutex
+
 func Handle(buf *bytes.Buffer, client *net.UDPAddr) {
 	uuid, fcfi, ok := GetMeta(buf)
 	if !ok {
@@ -34,6 +36,7 @@ func Handle(buf *bytes.Buffer, client *net.UDPAddr) {
 	}
 	//fmt.Println("UDP Message:\nUUID: ", uuid, "\nFCFI: ", fcfi)
 
+	ClientsMutex.Lock()
 	c, found := clients[uuid]
 
 	if !found {
@@ -43,6 +46,7 @@ func Handle(buf *bytes.Buffer, client *net.UDPAddr) {
 	}
 
 	c.Timeout = UDPClientTimeout
+	ClientsMutex.Unlock()
 
 	udpfuncs.Run(uuid, fcfi, buf)
 }
@@ -51,7 +55,13 @@ func UDPLoop(wg *sync.WaitGroup, conn *net.UDPConn) {
 	defer wg.Done()
 	udp = conn
 	for {
-		for k, v := range clients {
+
+		//Copy for minimal lock time.
+		ClientsMutex.Lock()
+		clientsCopy := make(map[string]*UDPClient)
+		ClientsMutex.Unlock()
+
+		for k, v := range clientsCopy {
 			//Timing out
 			v.Timeout -= 1.0 / float64(globals.Hertz)
 			if v.Timeout <= 0 {

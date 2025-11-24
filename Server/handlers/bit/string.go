@@ -9,7 +9,7 @@ import (
 func ReadString(buf *bytes.Buffer, size int) (string, bool) {
 	_size := size
 	if _size == -1 {
-		_size = buf.Available()
+		_size = buf.Len()
 	}
 
 	str := make([]byte, _size)

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace MultiAssembly.Handlers
 {
@@ -13,12 +11,12 @@ namespace MultiAssembly.Handlers
         static TCP()
         {
             functions["REG_"] = registerPlayer;
+            functions["UREG"] = unregisterPlayer;
         }
 
         public static void Run(string fcfi, MemoryStream stream)
         {
-            Action<MemoryStream> func = functions[fcfi];
-            if (func == null) {
+            if (!functions.TryGetValue(fcfi, out Action<MemoryStream> func)) {
                 throw new HandlerNotFoundException(fcfi);
             }
             func(stream);
@@ -26,7 +24,22 @@ namespace MultiAssembly.Handlers
 
         private static void registerPlayer(MemoryStream stream)
         {
-            Console.WriteLine("Registered new player:\nUUID: " + Bit.ReadString(stream, UUID.UUIDLength) + "\nUsername: " + Bit.ReadString(stream, -1));
+            string uuid = Bit.ReadString(stream, UUID.UUIDLength);
+            string username = Bit.ReadString(stream, -1);
+            Console.WriteLine("Registered new player:\nUUID: " + uuid + "\nUsername: " + username);
+            new Player(uuid, username);
+        }
+        private static void unregisterPlayer(MemoryStream stream)
+        {
+            string uuid = Bit.ReadString(stream, UUID.UUIDLength);
+            string username = Bit.ReadString(stream, -1);
+            Console.WriteLine("Unregistered player:\nUUID: " + uuid + "\nUsername: " + username);
+
+            Player? p = Player.Find(uuid);
+            if (p != null)
+            {
+                Player.Players.Remove(p);
+            }
         }
     }
 }

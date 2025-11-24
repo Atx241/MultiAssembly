@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using MultiAssembly.Handlers;
 using System.IO;
+using System.Net;
 
 namespace MultiAssembly
 {
@@ -172,21 +173,42 @@ namespace MultiAssembly
             byte[] buf = new byte[1024];
             while (true)
             {
-                if (shutdownThreads) return;
+                try
+                {
+                    if (shutdownThreads) return;
 
-                int n = tcp.GetStream().Read(buf, 0, buf.Length);
+                    int n = tcp.GetStream().Read(buf, 0, buf.Length);
 
-                MemoryStream stream = new MemoryStream((byte[])buf.Clone());
+                    Console.WriteLine("TCP Message: " + BitConverter.ToString(new ArraySegment<byte>(buf, 0, n).ToArray()) + "(length " + n + ")");
 
-                TCP.Run(Utility.ReadFCFI(stream), stream);
+                    MemoryStream stream = new MemoryStream((byte[])buf.Clone());
+
+                    TCP.Run(Utility.ReadFCFI(stream), stream);
+                } catch (Exception e)
+                {
+                    Console.WriteLine("TCP Exception occured: " + e.ToString());
+                }
             }
         }
         private static void udpLoop()
         {
             while (true)
             {
-                if (shutdownThreads) return;
+                try
+                {
+                    if (shutdownThreads) return;
 
+                    IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
+
+                    byte[] buf = udp.Receive(ref ep);
+
+                    MemoryStream stream = new MemoryStream((byte[])buf.Clone());
+
+                    UDP.Run(Utility.ReadFCFI(stream), stream);
+                } catch (Exception e)
+                {
+                    Console.WriteLine("UDP Exception occured: " + e.ToString());
+                }
             }
         }
     }

@@ -32,6 +32,11 @@ func HandleConn(conn *net.Conn) {
 
 			conns = slices.Delete(conns, connIdx, connIdx+1)
 
+			player.RemoveByID(associatedPlayer.PrivateUUID)
+			for _, c := range conns {
+				TCPWrite(c, bit.String("UREG"), bit.String((*associatedPlayer).PublicUUID), bit.String((*associatedPlayer).Username))
+			}
+
 			break
 		}
 
@@ -46,7 +51,7 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 	if !ok {
 		goto Corrupted
 	}
-	fmt.Println("TCP Message:\nUUID: ", uuid, "\nFCFI: ", fcfi)
+	//fmt.Println("TCP Message:\nUUID: ", uuid, "\nFCFI: ", fcfi)
 
 	player.Mutex.Lock()
 	defer player.Mutex.Unlock()
@@ -58,19 +63,29 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 		}
 
 		username, ok := bit.ReadString(buf, -1)
+		fmt.Println(len(username))
 		if !ok {
 			goto Corrupted
 		}
 
 		(*aPlayer) = player.New(username, uuid, puuid)
 
-		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid)
+		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid, "\n")
 
 		for _, c := range conns {
-			TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), bit.String((*aPlayer).Username))
+			err := TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), bit.String((*aPlayer).Username))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	case "UREG":
 		player.RemoveByID(uuid)
+		for _, c := range conns {
+			err := TCPWrite(c, bit.String("UREG"), bit.String((*aPlayer).PublicUUID), bit.String((*aPlayer).Username))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}
 	default:
 
 	}
