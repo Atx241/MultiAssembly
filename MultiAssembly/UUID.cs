@@ -1,13 +1,13 @@
-﻿namespace GlobiAssembly
+﻿namespace MultiAssembly
 {
     internal static class UUID
     {
-        public const int uuidLength = 16;
+        public const int UUIDLength = 16;
         public const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
         public static string Generate()
         {
             string ret = "";
-            for (int i = 0; i < uuidLength; i++)
+            for (int i = 0; i < UUIDLength; i++)
             {
                 ret += validChars[UnityEngine.Random.Range(0, validChars.Length)];
             }

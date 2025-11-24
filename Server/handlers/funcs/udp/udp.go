@@ -22,7 +22,11 @@ func Run(uuid string, fcfi string, buf *bytes.Buffer) bool {
 		fmt.Println("Invalid FCFI for UDP function")
 		return false
 	}
-	return fn(player.GetByID(uuid), buf)
+	p := player.GetByID(uuid)
+	if p == nil {
+		return false
+	}
+	return fn(p, buf)
 }
 
 func playerTransformUpdatePosition(p *player.Player, buf *bytes.Buffer) bool {
@@ -55,6 +59,5 @@ func playerTransformUpdateRotation(p *player.Player, buf *bytes.Buffer) bool {
 		return false
 	}
 	p.Rotation = util.Vector3{X: x, Y: y, Z: z}
-	fmt.Print("Rotation Update: ", p.Rotation.X, " ", p.Rotation.Y, " ", p.Rotation.Z, "\n")
 	return true
 }

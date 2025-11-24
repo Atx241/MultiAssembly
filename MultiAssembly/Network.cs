@@ -1,12 +1,13 @@
-﻿using MultiAssembly;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using MultiAssembly.Handlers;
+using System.IO;
 
-namespace GlobiAssembly
+namespace MultiAssembly
 {
     internal static class Network
     {
@@ -21,7 +22,9 @@ namespace GlobiAssembly
 
         private static bool Initialized = false;
         private static Thread? loopThread;
-        private static bool shutdownLoopThread = false;
+        private static Thread? tcpThread;
+        private static Thread? udpThread;
+        private static bool shutdownThreads = false;
 
         public static byte[] Bytes(params object[] objs)
         {
@@ -112,13 +115,18 @@ namespace GlobiAssembly
                 Console.WriteLine("Player part child: " + t.gameObject.name);
             }
 
-            if (loopThread != null)
-            {
-                loopThread.Join();
-            }
+            if (loopThread != null) loopThread.Join();
+            if (tcpThread != null) tcpThread.Join();
+            if (udpThread != null) udpThread.Join();
 
             loopThread = new Thread(new ThreadStart(loop));
             loopThread.Start();
+
+            tcpThread = new Thread(new ThreadStart(tcpLoop));
+            tcpThread.Start();
+
+            udpThread = new Thread(new ThreadStart(udpLoop));
+            udpThread.Start();
 
             Initialized = true;
         }
@@ -134,14 +142,15 @@ namespace GlobiAssembly
             tcp.Close();
             udp.Close();
 
-            if (loopThread != null)
-            {
-                shutdownLoopThread = true;
-                loopThread.Join();
-                shutdownLoopThread = false;
-            }
+            shutdownThreads = true;
+            if (loopThread != null) loopThread.Join();
+            if (tcpThread != null) tcpThread.Join();
+            if (udpThread != null) udpThread.Join();
+            shutdownThreads = false;
 
             loopThread = null;
+            tcpThread = null;
+            udpThread = null;
 
             Initialized = false;
         }
@@ -150,15 +159,34 @@ namespace GlobiAssembly
         {
             while (true)
             {
-                if (shutdownLoopThread)
-                {
-                    return;
-                }
+                if (shutdownThreads) return;
                 if (GameObjects.Player != null)
                 {
                     Plugin.PlayerLoop();
                 }
                 Thread.Sleep(1000 / NetworkHertz);
+            }
+        }
+        private static void tcpLoop()
+        {
+            byte[] buf = new byte[1024];
+            while (true)
+            {
+                if (shutdownThreads) return;
+
+                int n = tcp.GetStream().Read(buf, 0, buf.Length);
+
+                MemoryStream stream = new MemoryStream((byte[])buf.Clone());
+
+                TCP.Run(Utility.ReadFCFI(stream), stream);
+            }
+        }
+        private static void udpLoop()
+        {
+            while (true)
+            {
+                if (shutdownThreads) return;
+
             }
         }
     }

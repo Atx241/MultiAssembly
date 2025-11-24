@@ -15,12 +15,11 @@ func main() {
 	go tcpMain(&wg)
 	wg.Add(1)
 	go udpMain(&wg)
-	wg.Add(1)
-	go handlers.UDPLoop(&wg)
 	wg.Wait()
 }
 
 func tcpMain(wg *sync.WaitGroup) {
+	defer wg.Done()
 	fmt.Println("Initializing TCP...")
 	tcp, err := net.Listen("tcp", ":33333")
 	if err != nil {
@@ -36,10 +35,10 @@ func tcpMain(wg *sync.WaitGroup) {
 		}
 		handlers.HandleConn(&conn)
 	}
-	wg.Done()
 }
 
 func udpMain(wg *sync.WaitGroup) {
+	defer wg.Done()
 	fmt.Println("Initializing UDP...")
 	addr, err := net.ResolveUDPAddr("udp", ":33334")
 	if err != nil {
@@ -53,16 +52,25 @@ func udpMain(wg *sync.WaitGroup) {
 	}
 	fmt.Println("UDP successfully initialized")
 
+	wg.Add(1)
+	go handlers.UDPLoop(wg, udp)
+
 	buf := make([]byte, 2048)
-	size := 0
+
 	for {
 		var err error
 		var client *net.UDPAddr
+		size := 0
+
 		size, client, err = udp.ReadFromUDP(buf)
+
 		if err != nil {
 			fmt.Println("UDP Error occured: ", err.Error())
 		}
-		go handlers.Handle(bytes.NewBuffer(buf[:size]), client)
+
+		cbuf := make([]byte, size)
+		copy(cbuf, buf[:size])
+
+		go handlers.Handle(bytes.NewBuffer(cbuf[:size]), client)
 	}
-	wg.Done()
 }

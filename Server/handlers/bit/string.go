@@ -24,3 +24,7 @@ func ReadString(buf *bytes.Buffer, size int) (string, bool) {
 	}
 	return string(str), true
 }
+
+func String(s string) []byte {
+	return []byte(s)
+}

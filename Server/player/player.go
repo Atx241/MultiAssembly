@@ -1,6 +1,12 @@
 package player
 
-import "atxmedia.us/multiassembly/util"
+import (
+	"sync"
+
+	"atxmedia.us/multiassembly/util"
+)
+
+var Mutex sync.Mutex
 
 type Player struct {
 	Username    string

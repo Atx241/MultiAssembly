@@ -21,3 +21,7 @@ func ReadFloat64(buf *bytes.Buffer) (float64, bool) {
 	}
 	return math.Float64frombits(binary.LittleEndian.Uint64(f64)), true
 }
+
+func Float64(float float64) []byte {
+	return Uint64(math.Float64bits(float))
+}

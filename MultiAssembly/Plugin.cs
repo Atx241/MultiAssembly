@@ -1,9 +1,8 @@
 ﻿using System;
 using BepInEx;
-using MultiAssembly;
 using UnityEngine.SceneManagement;
 
-namespace GlobiAssembly
+namespace MultiAssembly
 {
     [BepInPlugin("atxmedia.globiassembly", "GlobiAssembly", "1.0.0")]
     public class Plugin : BaseUnityPlugin
@@ -16,7 +15,7 @@ namespace GlobiAssembly
         }
         private void Awake()
         {
-            Username = Environment.UserName;
+            Username = Environment.UserName.Trim();
             print("PublicKey: " + UUID.LocalKP.Public);
             print("PrivateKey: " + UUID.LocalKP.Private);
             Run();
@@ -63,8 +62,8 @@ namespace GlobiAssembly
         public static void PlayerLoop()
         {
             PlaneContainer player = GameObjects.Player!;
-            Network.SendUDP("PTUP", (double)player.transform.position.x, (double)player.transform.position.y, (double)player.transform.position.z);
             Network.SendUDP("PTUR", (double)player.transform.eulerAngles.x, (double)player.transform.eulerAngles.y, (double)player.transform.eulerAngles.z);
+            Network.SendUDP("PTUP", (double)player.transform.position.x, (double)player.transform.position.y, (double)player.transform.position.z);
         }
     }
 }
