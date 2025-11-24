@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"net"
 
+	"atxmedia.us/multiassembly/handlers/bit"
 	"atxmedia.us/multiassembly/player"
 )
 
 func HandleConn(conn *net.Conn) {
 	buf := make([]byte, 2048)
 	size := 0
+	var associatedPlayer *player.Player
 	var err error
 	for {
 		size, err = (*conn).Read(buf)
@@ -21,12 +23,13 @@ func HandleConn(conn *net.Conn) {
 			break
 		}
 
-		HandleRequest(bytes.NewBuffer(buf[:size]))
+		HandleRequest(bytes.NewBuffer(buf[:size]), &associatedPlayer)
 	}
+	associatedPlayer.Remove()
 	(*conn).Close()
 }
 
-func HandleRequest(buf *bytes.Buffer) {
+func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player) {
 	uuid, fcfi, ok := GetMeta(buf)
 	if !ok {
 		goto Corrupted
@@ -35,19 +38,22 @@ func HandleRequest(buf *bytes.Buffer) {
 
 	switch fcfi {
 	case "REG_":
-		puuid, ok := ReadString(buf, 16)
+		puuid, ok := bit.ReadString(buf, 16)
 		if !ok {
 			goto Corrupted
 		}
 
-		username, ok := ReadString(buf, -1)
+		username, ok := bit.ReadString(buf, -1)
 		if !ok {
 			goto Corrupted
 		}
 
-		player.Players = append(player.Players, player.NewPlayer(username, uuid, puuid))
+		(*aPlayer) = player.New(username, uuid, puuid)
+
 		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid)
 	case "UREG":
+		player.RemoveByID(uuid)
+	default:
 
 	}
 	return

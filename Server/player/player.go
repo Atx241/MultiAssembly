@@ -10,8 +10,21 @@ type Player struct {
 	Rotation    util.Vector3
 }
 
-func NewPlayer(Username string, PrivateUUID string, PublicUUID string) Player {
-	return Player{Username: Username, PrivateUUID: PrivateUUID, PublicUUID: PublicUUID}
+func (p Player) Remove() {
+	RemoveByID(p.PrivateUUID)
 }
 
-var Players []Player = make([]Player, 0)
+func New(Username string, PrivateUUID string, PublicUUID string) *Player {
+	p := Player{Username: Username, PrivateUUID: PrivateUUID, PublicUUID: PublicUUID}
+	players[p.PrivateUUID] = &p
+	return &p
+
+}
+func GetByID(privateUUID string) *Player {
+	return players[privateUUID]
+}
+func RemoveByID(privateUUID string) {
+	delete(players, privateUUID)
+}
+
+var players map[string]*Player = make(map[string]*Player, 0)

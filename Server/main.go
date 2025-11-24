@@ -15,6 +15,8 @@ func main() {
 	go tcpMain(&wg)
 	wg.Add(1)
 	go udpMain(&wg)
+	wg.Add(1)
+	go handlers.UDPLoop(&wg)
 	wg.Wait()
 }
 
@@ -55,11 +57,12 @@ func udpMain(wg *sync.WaitGroup) {
 	size := 0
 	for {
 		var err error
-		size, _, err = udp.ReadFromUDP(buf)
+		var client *net.UDPAddr
+		size, client, err = udp.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Println("UDP Error occured: ", err.Error())
 		}
-		go handlers.Handle(bytes.NewBuffer(buf[:size]))
+		go handlers.Handle(bytes.NewBuffer(buf[:size]), client)
 	}
 	wg.Done()
 }

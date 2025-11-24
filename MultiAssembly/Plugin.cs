@@ -1,5 +1,6 @@
 ﻿using System;
 using BepInEx;
+using MultiAssembly;
 using UnityEngine.SceneManagement;
 
 namespace GlobiAssembly
@@ -57,6 +58,13 @@ namespace GlobiAssembly
             {
                 Network.Disconnect();
             }
+        }
+
+        public static void PlayerLoop()
+        {
+            PlaneContainer player = GameObjects.Player!;
+            Network.SendUDP("PTUP", (double)player.transform.position.x, (double)player.transform.position.y, (double)player.transform.position.z);
+            Network.SendUDP("PTUR", (double)player.transform.eulerAngles.x, (double)player.transform.eulerAngles.y, (double)player.transform.eulerAngles.z);
         }
     }
 }
