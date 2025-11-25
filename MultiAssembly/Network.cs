@@ -14,7 +14,7 @@ namespace MultiAssembly
     {
         public const int NetworkHertz = 60;
 
-        public static string host = "localhost";
+        public static string host = "10.144.154.223";
         public static int tcpPort = 33333;
         public static int udpPort = 33334;
 
