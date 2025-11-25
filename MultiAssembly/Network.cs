@@ -179,9 +179,10 @@ namespace MultiAssembly
 
                     int n = tcp.GetStream().Read(buf, 0, buf.Length);
 
-                    Console.WriteLine("TCP Message: " + BitConverter.ToString(new ArraySegment<byte>(buf, 0, n).ToArray()) + "(length " + n + ")");
+                    //Console.WriteLine("TCP Message: " + BitConverter.ToString(new ArraySegment<byte>(buf, 0, n).ToArray()) + "(length " + n + ")");
 
                     MemoryStream stream = new MemoryStream((byte[])buf.Clone());
+                    stream.SetLength(n);
 
                     TCP.Run(Utility.ReadFCFI(stream), stream);
                 } catch (Exception e)

@@ -20,7 +20,7 @@ namespace MultiAssembly
 
             gameObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             gameObject.transform.localScale = Vector3.one * 4;
-            UnityEngine.Object.Destroy(gameObject.GetComponent<BoxCollider>());
+            UnityEngine.Object.Destroy(gameObject.GetComponent<SphereCollider>());
         }
 
         public static Player? Find(string uuid)
@@ -39,6 +39,7 @@ namespace MultiAssembly
         }
 
         ~Player() {
+            Console.WriteLine("GameObject destroyed");
             UnityEngine.Object.Destroy(gameObject);
         }
     }

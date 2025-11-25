@@ -63,7 +63,6 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 		}
 
 		username, ok := bit.ReadString(buf, -1)
-		fmt.Println(len(username))
 		if !ok {
 			goto Corrupted
 		}

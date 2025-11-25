@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"maps"
 	"net"
 	"sync"
 	"time"
@@ -59,6 +60,7 @@ func UDPLoop(wg *sync.WaitGroup, conn *net.UDPConn) {
 		//Copy for minimal lock time.
 		ClientsMutex.Lock()
 		clientsCopy := make(map[string]*UDPClient)
+		maps.Copy(clientsCopy, clients)
 		ClientsMutex.Unlock()
 
 		for k, v := range clientsCopy {
@@ -70,6 +72,7 @@ func UDPLoop(wg *sync.WaitGroup, conn *net.UDPConn) {
 			}
 
 			player.Mutex.Lock()
+			fmt.Println("Player mutex acquired")
 
 			p := player.GetByID(v.UUID)
 
