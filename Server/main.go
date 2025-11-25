@@ -34,7 +34,7 @@ func tcpMain(wg *sync.WaitGroup) {
 		if err != nil {
 			fmt.Println("TCP Error occured: ", err.Error())
 		}
-		handlers.HandleConn(&conn)
+		go handlers.HandleConn(&conn)
 	}
 }
 
