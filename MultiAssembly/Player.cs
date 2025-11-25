@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
+//using TMPro;
 
 namespace MultiAssembly
 {
@@ -23,11 +23,11 @@ namespace MultiAssembly
             gameObject.transform.localScale = Vector3.one * 4;
             UnityEngine.Object.Destroy(gameObject.GetComponent<SphereCollider>());
 
-            GameObject unText = new GameObject();
-            unText.transform.SetParent(gameObject.transform, false);
-            unText.transform.localPosition = Vector3.up * 5;
-            TextMeshPro textComp = unText.AddComponent<TextMeshPro>();
-            textComp.text = Username;
+            //GameObject unText = new GameObject();
+            //unText.transform.SetParent(gameObject.transform, false);
+            //unText.transform.localPosition = Vector3.up * 5;
+            //TextMeshPro textComp = unText.AddComponent<TextMeshPro>();
+            //textComp.text = Username;
         }
 
         public static Player? Find(string uuid)
