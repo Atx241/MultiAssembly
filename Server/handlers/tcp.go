@@ -32,6 +32,9 @@ func HandleConn(conn *net.Conn) {
 
 			conns = slices.Delete(conns, connIdx, connIdx+1)
 
+			if associatedPlayer == nil {
+				break
+			}
 			player.RemoveByID(associatedPlayer.PrivateUUID)
 			for _, c := range conns {
 				TCPWrite(c, bit.String("UREG"), bit.String((*associatedPlayer).PublicUUID), bit.String((*associatedPlayer).Username))
@@ -44,7 +47,21 @@ func HandleConn(conn *net.Conn) {
 			break
 		}
 
-		HandleRequest(bytes.NewBuffer(buf[:size]), &associatedPlayer, conn)
+		byteBuf := bytes.NewBuffer(buf[:size])
+
+		for byteBuf.Len() > 0 {
+			size, ok := bit.ReadUint16(byteBuf)
+
+			if !ok {
+				fmt.Println("Failed to read buffer size")
+			}
+
+			tmpBuf := make([]byte, size)
+
+			byteBuf.Read(tmpBuf)
+
+			HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn)
+		}
 	}
 	associatedPlayer.Remove()
 	(*conn).Close()

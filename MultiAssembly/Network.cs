@@ -14,7 +14,7 @@ namespace MultiAssembly
     {
         public const int NetworkHertz = 60;
 
-        public static string host = "10.144.154.223";
+        public static string host = "localhost";
         public static int tcpPort = 33333;
         public static int udpPort = 33334;
 
@@ -89,6 +89,9 @@ namespace MultiAssembly
             List<byte> bytes = new List<byte>();
             bytes.AddRange(Bytes(UUID.LocalKP.Private, fcfi));
             bytes.AddRange(BytesFromArray(objs));
+            var tmp = new List<byte>(Bytes((ushort)bytes.Count));
+            tmp.AddRange(bytes);
+            bytes = tmp;
             tcp.GetStream().Write(bytes.ToArray(), 0, bytes.Count);
         }
 
