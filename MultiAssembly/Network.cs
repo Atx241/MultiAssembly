@@ -14,7 +14,7 @@ namespace MultiAssembly
     {
         public const int NetworkHertz = 60;
 
-        public static string host = "10.144.154.223";
+        public static string host = "localhost";
         public static int tcpPort = 33333;
         public static int udpPort = 33334;
 
@@ -105,34 +105,41 @@ namespace MultiAssembly
 
         public static void Initialize()
         {
-            tcp = new TcpClient { NoDelay = true };
-            udp = new UdpClient();
-            tcp.Connect(host, tcpPort);
-            udp.Connect(host, udpPort);
-
-            SendTCP("REG_", UUID.LocalKP.Public, Plugin.Username);
-
-            GameObjects.Player = GameObject.FindFirstObjectByType<PlaneContainer>();
-
-            foreach (Transform t in GameObjects.Player.transform)
+            try
             {
-                Console.WriteLine("Player part child: " + t.gameObject.name);
+                tcp = new TcpClient { NoDelay = true };
+                udp = new UdpClient();
+                tcp.Connect(host, tcpPort);
+                udp.Connect(host, udpPort);
+
+                SendTCP("REG_", UUID.LocalKP.Public, Plugin.Username);
+
+                GameObjects.Player = GameObject.FindFirstObjectByType<PlaneContainer>();
+
+                foreach (Transform t in GameObjects.Player.transform)
+                {
+                    Console.WriteLine("Player part child: " + t.gameObject.name);
+                }
+
+                if (loopThread != null) loopThread.Join();
+                if (tcpThread != null) tcpThread.Join();
+                if (udpThread != null) udpThread.Join();
+
+                loopThread = new Thread(new ThreadStart(loop));
+                loopThread.Start();
+
+                tcpThread = new Thread(new ThreadStart(tcpLoop));
+                tcpThread.Start();
+
+                udpThread = new Thread(new ThreadStart(udpLoop));
+                udpThread.Start();
+
+                Initialized = true;
             }
-
-            if (loopThread != null) loopThread.Join();
-            if (tcpThread != null) tcpThread.Join();
-            if (udpThread != null) udpThread.Join();
-
-            loopThread = new Thread(new ThreadStart(loop));
-            loopThread.Start();
-
-            tcpThread = new Thread(new ThreadStart(tcpLoop));
-            tcpThread.Start();
-
-            udpThread = new Thread(new ThreadStart(udpLoop));
-            udpThread.Start();
-
-            Initialized = true;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
         public static bool IsInitialized()
         {
