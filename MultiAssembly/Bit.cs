@@ -34,5 +34,23 @@ namespace MultiAssembly
             }
             return Encoding.UTF8.GetString(buf);
         }
+        public static ushort ReadUShort(MemoryStream stream)
+        {
+            byte[] buf = new byte[2];
+            int n = stream.Read(buf, 0, 2);
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                byte[] tmpbuf = buf;
+                buf[1] = tmpbuf[0];
+                buf[0] = tmpbuf[1];
+            }
+
+            if (n < 2)
+            {
+                throw new InvalidOperationException("Not enough data in memory stream to read double (read " + n + " want 2)");
+            }
+            return BitConverter.ToUInt16(buf);
+        }
     }
 }

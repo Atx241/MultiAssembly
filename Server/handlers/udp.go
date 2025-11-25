@@ -72,7 +72,6 @@ func UDPLoop(wg *sync.WaitGroup, conn *net.UDPConn) {
 			}
 
 			player.Mutex.Lock()
-			fmt.Println("Player mutex acquired")
 
 			p := player.GetByID(v.UUID)
 
@@ -81,9 +80,21 @@ func UDPLoop(wg *sync.WaitGroup, conn *net.UDPConn) {
 				break
 			}
 			//Data sending
-			for _, rec := range clients {
-				UDPWrite(rec.Addr, bit.String("PTUP"), bit.String(p.PublicUUID), bit.Float64(p.Position.X), bit.Float64(p.Position.Y), bit.Float64(p.Position.Z))
-				UDPWrite(rec.Addr, bit.String("PTUR"), bit.String(p.PublicUUID), bit.Float64(p.Rotation.X), bit.Float64(p.Rotation.Y), bit.Float64(p.Rotation.Z))
+			for k2, rec := range clientsCopy {
+				err := UDPWrite(rec.Addr, bit.String("PTUP"), bit.String(p.PublicUUID), bit.Float64(p.Position.X), bit.Float64(p.Position.Y), bit.Float64(p.Position.Z))
+				if err != nil {
+					fmt.Println(err)
+					ClientsMutex.Lock()
+					delete(clients, k2)
+					ClientsMutex.Unlock()
+				}
+				err = UDPWrite(rec.Addr, bit.String("PTUR"), bit.String(p.PublicUUID), bit.Float64(p.Rotation.X), bit.Float64(p.Rotation.Y), bit.Float64(p.Rotation.Z))
+				if err != nil {
+					fmt.Println(err)
+					ClientsMutex.Lock()
+					delete(clients, k2)
+					ClientsMutex.Unlock()
+				}
 			}
 
 			player.Mutex.Unlock()

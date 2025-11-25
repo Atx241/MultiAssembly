@@ -37,6 +37,10 @@ func HandleConn(conn *net.Conn) {
 				TCPWrite(c, bit.String("UREG"), bit.String((*associatedPlayer).PublicUUID), bit.String((*associatedPlayer).Username))
 			}
 
+			ClientsMutex.Lock()
+			delete(clients, associatedPlayer.PrivateUUID)
+			ClientsMutex.Unlock()
+
 			break
 		}
 
@@ -77,6 +81,12 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 				fmt.Println(err.Error())
 			}
 		}
+		for _, p := range player.All() {
+			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), bit.String(p.Username))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}
 	case "UREG":
 		player.RemoveByID(uuid)
 		for _, c := range conns {
@@ -97,7 +107,8 @@ func TCPWrite(conn *net.Conn, bytes ...[]byte) error {
 	if conn == nil {
 		return errors.New("TCP connection is nil")
 	}
-	_, err := (*conn).Write(bit.M(bytes...))
+	data := bit.M(bytes...)
+	_, err := (*conn).Write(bit.M(bit.Uint16(uint16(len(data))), data))
 	if err != nil {
 		return err
 	}

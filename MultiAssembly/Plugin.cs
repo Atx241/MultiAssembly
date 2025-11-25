@@ -15,10 +15,15 @@ namespace MultiAssembly
         }
         private void Awake()
         {
+            AppDomain.CurrentDomain.ProcessExit += OnExit;
             Username = Environment.UserName.Trim();
             print("PublicKey: " + UUID.LocalKP.Public);
             print("PrivateKey: " + UUID.LocalKP.Private);
             Run();
+        }
+        private void OnExit(object sender, EventArgs e)
+        {
+            Network.Disconnect();
         }
         public void Run()
         {

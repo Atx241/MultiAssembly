@@ -26,8 +26,9 @@ namespace MultiAssembly.Handlers
         {
             string uuid = Bit.ReadString(stream, UUID.UUIDLength);
             string username = Bit.ReadString(stream, -1);
+            if (Player.Find(uuid) != null) return;
             Console.WriteLine("Registered new player:\nUUID: " + uuid + "\nUsername: \"" + username + "\"");
-            new Player(uuid, username);
+            Player.New(uuid, username);
         }
         private static void unregisterPlayer(MemoryStream stream)
         {

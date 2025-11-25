@@ -16,6 +16,8 @@ type Player struct {
 	Rotation    util.Vector3
 }
 
+var players map[string]*Player = make(map[string]*Player, 0)
+
 func (p Player) Remove() {
 	RemoveByID(p.PrivateUUID)
 }
@@ -32,5 +34,6 @@ func GetByID(privateUUID string) *Player {
 func RemoveByID(privateUUID string) {
 	delete(players, privateUUID)
 }
-
-var players map[string]*Player = make(map[string]*Player, 0)
+func All() map[string]*Player {
+	return players
+}

@@ -16,6 +16,12 @@ namespace MultiAssembly.Handlers
         {
         }
     }
+    internal class PlayerNotFoundException : Exception
+    {
+        public PlayerNotFoundException(string player) : base("Player not found (attempted to search for player " + player + ")")
+        {
+        }
+    }
     internal static class Utility {
         public static string ReadFCFI(MemoryStream stream)
         {

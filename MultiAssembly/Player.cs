@@ -12,7 +12,7 @@ namespace MultiAssembly
         public string UUID;
 
         private GameObject gameObject;
-        public Player(string uuid, string username)
+        private Player(string uuid, string username)
         {
             UUID = uuid;
             Username = username;
@@ -33,14 +33,26 @@ namespace MultiAssembly
             }
             return null;
         }
+        public static Player New(string uuid, string username)
+        {
+            Player ret = new Player(uuid, username);
+            Players.Add(ret);
+            Console.WriteLine("New player");
+            return ret;
+        }
         public GameObject GetGameObject()
         {
             return gameObject;
         }
 
-        ~Player() {
-            Console.WriteLine("GameObject destroyed");
+        public void Destroy()
+        {
+            Players.Remove(this);
             UnityEngine.Object.Destroy(gameObject);
+        }
+
+        ~Player() {
+            Destroy();
         }
     }
 }

@@ -140,9 +140,6 @@ namespace MultiAssembly
         {
             SendTCP("UREG", UUID.LocalKP.Public);
 
-            tcp.Close();
-            udp.Close();
-
             shutdownThreads = true;
             if (loopThread != null) loopThread.Join();
             if (tcpThread != null) tcpThread.Join();
@@ -152,6 +149,14 @@ namespace MultiAssembly
             loopThread = null;
             tcpThread = null;
             udpThread = null;
+
+            tcp.Close();
+            udp.Close();
+
+            while (Player.Players.Count > 0)
+            {
+                Player.Players[0].Destroy();
+            }
 
             Initialized = false;
         }
@@ -173,43 +178,58 @@ namespace MultiAssembly
             byte[] buf = new byte[1024];
             while (true)
             {
+                if (shutdownThreads) return;
                 try
                 {
-                    if (shutdownThreads) return;
+                    if (tcp.Available <= 0) goto End;
 
                     int n = tcp.GetStream().Read(buf, 0, buf.Length);
 
                     //Console.WriteLine("TCP Message: " + BitConverter.ToString(new ArraySegment<byte>(buf, 0, n).ToArray()) + "(length " + n + ")");
 
-                    MemoryStream stream = new MemoryStream((byte[])buf.Clone());
-                    stream.SetLength(n);
+                    MemoryStream stream = new MemoryStream((byte[])buf.Clone(), 0, n, false, true);
 
-                    TCP.Run(Utility.ReadFCFI(stream), stream);
+                    while (stream.Position < stream.Length)
+                    {
+                        ushort packetLength = Bit.ReadUShort(stream);
+
+                        MemoryStream tmpStream = new MemoryStream(stream.GetBuffer(), (int)stream.Position, packetLength, false);
+
+                        stream.Position += packetLength;
+
+                        TCP.Run(Utility.ReadFCFI(tmpStream), tmpStream);
+                    }
                 } catch (Exception e)
                 {
                     Console.WriteLine("TCP Exception occured: " + e.ToString());
                 }
+            End:
+                Thread.Sleep(1000 / NetworkHertz);
             }
         }
         private static void udpLoop()
         {
             while (true)
             {
+                if (shutdownThreads) return;
                 try
                 {
-                    if (shutdownThreads) return;
+                    while (udp.Available > 0)
+                    {
 
-                    IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
+                        IPEndPoint ep = new IPEndPoint(IPAddress.Any, 0);
 
-                    byte[] buf = udp.Receive(ref ep);
+                        byte[] buf = udp.Receive(ref ep);
 
-                    MemoryStream stream = new MemoryStream((byte[])buf.Clone());
+                        MemoryStream stream = new MemoryStream((byte[])buf.Clone());
 
-                    UDP.Run(Utility.ReadFCFI(stream), stream);
+                        UDP.Run(Utility.ReadFCFI(stream), stream);
+                    }
                 } catch (Exception e)
                 {
                     Console.WriteLine("UDP Exception occured: " + e.ToString());
                 }
+                Thread.Sleep(1000 / NetworkHertz);
             }
         }
     }

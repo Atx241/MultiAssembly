@@ -34,7 +34,8 @@ namespace MultiAssembly.Handlers
             Player? p = Player.Find(uuid);
             if (p == null)
             {
-                throw new InvalidOperationException("Player not found (attempted to search for player " + uuid + ")");
+                return;
+                //throw new PlayerNotFoundException(uuid);
             }
             p.GetGameObject().transform.position = new Vector3(x, y, z);
         }
@@ -47,7 +48,8 @@ namespace MultiAssembly.Handlers
             Player? p = Player.Find(uuid);
             if (p == null)
             {
-                throw new InvalidOperationException("Player not found (attempted to search for player " + uuid + ")");
+                return;
+                //throw new PlayerNotFoundException(uuid);
             }
             p.GetGameObject().transform.eulerAngles = new Vector3(x, y, z);
         }

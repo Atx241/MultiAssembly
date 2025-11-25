@@ -7,7 +7,6 @@ import (
 	"math"
 )
 
-// NOTE: Using a size of -1 will read the rest of the buffer
 func ReadFloat64(buf *bytes.Buffer) (float64, bool) {
 	f64 := make([]byte, 8)
 	n, err := buf.Read(f64)
