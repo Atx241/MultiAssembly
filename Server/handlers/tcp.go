@@ -22,7 +22,6 @@ func Disconnect(conn *net.Conn, connIdx int, associatedPlayer *player.Player) {
 	if associatedPlayer == nil {
 		return
 	}
-	recover()
 	player.RemoveByID(associatedPlayer.PrivateUUID)
 	for _, c := range conns {
 		TCPWrite(c, bit.String("UREG"), bit.String((*associatedPlayer).PublicUUID), bit.String((*associatedPlayer).Username))
@@ -63,7 +62,9 @@ func HandleConn(conn *net.Conn) {
 
 			byteBuf.Read(tmpBuf)
 
-			HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn, connIdx)
+			if HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn, connIdx) {
+				break
+			}
 		}
 	}
 	associatedPlayer.Remove()
