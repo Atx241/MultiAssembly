@@ -14,6 +14,25 @@ import (
 
 var conns []*net.Conn
 
+func Disconnect(conn *net.Conn, connIdx int, associatedPlayer *player.Player) {
+	fmt.Print("Closing connection for ", (*conn).RemoteAddr().String(), "...\n")
+
+	conns = slices.Delete(conns, connIdx, connIdx+1)
+
+	if associatedPlayer == nil {
+		return
+	}
+	recover()
+	player.RemoveByID(associatedPlayer.PrivateUUID)
+	for _, c := range conns {
+		TCPWrite(c, bit.String("UREG"), bit.String((*associatedPlayer).PublicUUID), bit.String((*associatedPlayer).Username))
+	}
+
+	ClientsMutex.Lock()
+	delete(clients, associatedPlayer.PrivateUUID)
+	ClientsMutex.Unlock()
+}
+
 func HandleConn(conn *net.Conn) {
 	buf := make([]byte, 65536)
 
@@ -27,22 +46,7 @@ func HandleConn(conn *net.Conn) {
 
 		if err != nil {
 			fmt.Println("TCP connection error occured: ", err.Error())
-			fmt.Print("Closing connection for ", (*conn).RemoteAddr().String(), "...\n")
-
-			conns = slices.Delete(conns, connIdx, connIdx+1)
-
-			if associatedPlayer == nil {
-				break
-			}
-			player.RemoveByID(associatedPlayer.PrivateUUID)
-			for _, c := range conns {
-				TCPWrite(c, bit.String("UREG"), bit.String((*associatedPlayer).PublicUUID), bit.String((*associatedPlayer).Username))
-			}
-
-			ClientsMutex.Lock()
-			delete(clients, associatedPlayer.PrivateUUID)
-			ClientsMutex.Unlock()
-
+			Disconnect(conn, connIdx, associatedPlayer)
 			break
 		}
 
@@ -59,14 +63,14 @@ func HandleConn(conn *net.Conn) {
 
 			byteBuf.Read(tmpBuf)
 
-			HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn)
+			HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn, connIdx)
 		}
 	}
 	associatedPlayer.Remove()
 	(*conn).Close()
 }
 
-func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
+func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn, connIdx int) bool {
 	uuid, fcfi, ok := GetMeta(buf)
 	if !ok {
 		goto Corrupted
@@ -112,19 +116,15 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 			}
 		}
 	case "UREG":
-		player.RemoveByID(uuid)
-		for _, c := range conns {
-			err := TCPWrite(c, bit.String("UREG"), bit.String((*aPlayer).PublicUUID), bit.String((*aPlayer).Username))
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-		}
+		Disconnect(conn, connIdx, *aPlayer)
+		return true
 	default:
 
 	}
-	return
+	return false
 Corrupted:
 	fmt.Println("Data corrupted for TCP connection")
+	return false
 }
 
 func TCPWrite(conn *net.Conn, bytes ...[]byte) error {
