@@ -13,6 +13,7 @@ namespace MultiAssembly
     internal static class Network
     {
         public const int NetworkHertz = 60;
+        public const int NetworkTimeout = 5000;
 
         public static string host = "10.144.154.223";
         //public static string host = "localhost";
@@ -117,7 +118,40 @@ namespace MultiAssembly
             {
                 tcp = new TcpClient { NoDelay = true };
                 udp = new UdpClient();
-                tcp.Connect(host, tcpPort);
+                try
+                {
+                    var tcpConnected = tcp.ConnectAsync(host, tcpPort).Wait(NetworkTimeout);
+                    if (!tcpConnected)
+                    {
+                        if (UI.DataText != null)
+                        {
+                            UI.DataText.text = "Not connected to server";
+                            UI.DataText.color = Color.red;
+                        }
+                        return;
+                    }
+                } 
+                catch (SocketException)
+                {
+                    if (UI.DataText != null)
+                    {
+                        UI.DataText.text = "Not connected to server";
+                        UI.DataText.color = Color.red;
+                    }
+                    return;
+                }
+                catch (AggregateException e)
+                {
+                    if (e.InnerException is SocketException)
+                    {
+                        if (UI.DataText != null)
+                        {
+                            UI.DataText.text = "Not connected to server";
+                            UI.DataText.color = Color.red;
+                        }
+                        return;
+                    }
+                }
                 udp.Connect(host, udpPort);
 
                 List<byte> vehicle = new List<byte>();

@@ -65,8 +65,8 @@ namespace MultiAssembly
                     creditText.transform.parent = menuCanvas.transform;
                     creditText.rectTransform.anchorMin = Vector2.zero;
                     creditText.rectTransform.anchorMax = Vector2.zero;
-                    creditText.rectTransform.anchoredPosition = new Vector2(700, 0);
-                    creditText.rectTransform.sizeDelta = new Vector2(600, 200);
+                    creditText.rectTransform.anchoredPosition = new Vector2(100, 0);
+                    creditText.rectTransform.sizeDelta = new Vector2(600, 400);
                     creditText.text = "Multiplayer powered by AtxMedia\nVersion " + VersionMajor + "." + VersionMinor + "." + VersionPatch + " inc " + VersionInc;
                     creditText.fontSize = 18;
                 }
@@ -83,6 +83,7 @@ namespace MultiAssembly
 
         public void GameLoad()
         {
+            UI.Initialize();
             if (!Network.IsInitialized())
             {
                 Network.Initialize();

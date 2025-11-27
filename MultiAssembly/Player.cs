@@ -16,30 +16,30 @@ namespace MultiAssembly
 
         private GameObject gameObject;
 
+        //Use this discretely for each component instead of deleting multiple components with one loop to prevent unity shenanigans
+        public void CleanComponent<T>(GameObject go, Component[] components) where T : Component
+        {
+            for (int i = 0; i < components.Length; i++)
+            {
+                Component comp = components[i];
+                switch (comp)
+                {
+                    case T t:
+                        GameObject.DestroyImmediate(t, false);
+                        break;
+                }
+            }
+        }
+
         public void CleanParts(object obj)
         {
             var part = (GameObject)obj;
-            //Run twice in case of dependencies
-            for (int rpt = 0; rpt < 2; rpt++)
-            {
-                Component[] components = part.GetComponents<Component>();
-                for (int i = 0; i < components.Length; i++)
-                {
-                    Component comp = components[i];
-                    //if (!(comp is MeshRenderer) && !(comp is MeshFilter) && !(comp is Transform) && !(comp is PaintableRenderer) && !(comp is WingVisual))
-                    if ((comp is Collider) || (comp is Wheel))
-                    {
-                        if (comp is Behaviour b)
-                        {
-                            b.enabled = false;
-                        }
-                        else
-                        {
-                            GameObject.Destroy(comp);
-                        }
-                    }
-                }
-            }
+            Component[] components = part.GetComponents<Component>();
+
+            //These are the only two erroneous components found yet. If more are found add them here
+            CleanComponent<Wheel>(part, components);
+            CleanComponent<Collider>(part, components);
+            
             foreach (Transform c in part.transform)
             {
                 CleanParts(c.gameObject);
@@ -49,12 +49,9 @@ namespace MultiAssembly
         {
             UUID = uuid;
             Username = username;
-            Players.Add(this);
 
-            //gameObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //gameObject.transform.localScale = Vector3.one * 4;
-            //UnityEngine.Object.Destroy(gameObject.GetComponent<SphereCollider>());
-            gameObject = new GameObject();
+            gameObject = new GameObject("Player" + UUID, typeof(Rigidbody));
+            gameObject.GetComponent<Rigidbody>().isKinematic = true;
 
             while (vehicle.Position < vehicle.Length)
             {
@@ -70,16 +67,17 @@ namespace MultiAssembly
                 {
                     continue;
                 }
-                GameObject child = MonoBehaviour.Instantiate(PartPrefabs.GetPartPrefab(name));
+                GameObject child = GameObject.Instantiate(PartPrefabs.GetPartPrefab(name));
 
                 child.transform.parent = gameObject.transform;
 
                 child.transform.localPosition = new Vector3(px, py, pz);
                 child.transform.localEulerAngles = new Vector3(rx, ry, rz);
 
-                Thread t = new Thread(CleanParts);
-                t.Start(child);
-                t.Join();
+                //Thread t = new Thread(CleanParts);
+                //t.Start(child);
+                //t.Join();
+                CleanParts(child);
             }
         }
 

@@ -14,10 +14,14 @@ import (
 
 var conns []*net.Conn
 
-func Disconnect(conn *net.Conn, connIdx int, associatedPlayer *player.Player) {
+func Disconnect(conn *net.Conn, associatedPlayer *player.Player) {
 	fmt.Print("Closing connection for ", (*conn).RemoteAddr().String(), "...\n")
 
-	conns = slices.Delete(conns, connIdx, connIdx+1)
+	for i := 0; i < len(conns); i++ {
+		if conns[i] == conn {
+			conns = slices.Delete(conns, i, i+1)
+		}
+	}
 
 	if associatedPlayer == nil {
 		return
@@ -39,7 +43,6 @@ func HandleConn(conn *net.Conn) {
 
 	var associatedPlayer *player.Player
 
-	connIdx := len(conns)
 	conns = append(conns, conn)
 MainLoop:
 	for {
@@ -47,7 +50,7 @@ MainLoop:
 
 		if err != nil {
 			fmt.Println("TCP connection error occured: ", err.Error())
-			Disconnect(conn, connIdx, associatedPlayer)
+			Disconnect(conn, associatedPlayer)
 			break
 		}
 
@@ -64,14 +67,14 @@ MainLoop:
 
 			byteBuf.Read(tmpBuf)
 
-			if HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn, connIdx) {
+			if HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn) {
 				break MainLoop
 			}
 		}
 	}
 }
 
-func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn, connIdx int) bool {
+func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) bool {
 	uuid, fcfi, ok := GetMeta(buf)
 	if !ok {
 		goto Corrupted
@@ -112,13 +115,13 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn, c
 			}
 		}
 		for _, p := range player.All() {
-			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), []byte{byte(len((*aPlayer).Username))}, bit.String(p.Username), p.Vehicle)
+			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), []byte{byte(len(p.Username))}, bit.String(p.Username), p.Vehicle)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
 		}
 	case "UREG":
-		Disconnect(conn, connIdx, *aPlayer)
+		Disconnect(conn, *aPlayer)
 		return true
 	default:
 
