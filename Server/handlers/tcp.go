@@ -30,6 +30,8 @@ func Disconnect(conn *net.Conn, connIdx int, associatedPlayer *player.Player) {
 	ClientsMutex.Lock()
 	delete(clients, associatedPlayer.PrivateUUID)
 	ClientsMutex.Unlock()
+
+	(*conn).Close()
 }
 
 func HandleConn(conn *net.Conn) {
@@ -39,7 +41,7 @@ func HandleConn(conn *net.Conn) {
 
 	connIdx := len(conns)
 	conns = append(conns, conn)
-
+MainLoop:
 	for {
 		size, err := (*conn).Read(buf)
 
@@ -63,12 +65,10 @@ func HandleConn(conn *net.Conn) {
 			byteBuf.Read(tmpBuf)
 
 			if HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn, connIdx) {
-				break
+				break MainLoop
 			}
 		}
 	}
-	associatedPlayer.Remove()
-	(*conn).Close()
 }
 
 func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn, connIdx int) bool {
