@@ -14,6 +14,7 @@ type Player struct {
 	PublicUUID  string
 	Position    util.Vector3
 	Rotation    util.Vector3
+	Vehicle     []byte
 }
 
 var players map[string]*Player = make(map[string]*Player, 0)
