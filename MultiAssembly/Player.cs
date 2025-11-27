@@ -26,7 +26,8 @@ namespace MultiAssembly
                 for (int i = 0; i < components.Length; i++)
                 {
                     Component comp = components[i];
-                    if (!(comp is MeshRenderer) && !(comp is MeshFilter) && !(comp is Transform) && !(comp is PaintableRenderer) && !(comp is WingVisual))
+                    //if (!(comp is MeshRenderer) && !(comp is MeshFilter) && !(comp is Transform) && !(comp is PaintableRenderer) && !(comp is WingVisual))
+                    if ((comp is Collider) || (comp is Wheel))
                     {
                         if (comp is Behaviour b)
                         {
