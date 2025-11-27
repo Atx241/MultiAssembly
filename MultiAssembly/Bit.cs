@@ -19,6 +19,17 @@ namespace MultiAssembly
             return BitConverter.ToDouble(buf, 0);
         }
 
+        public static float ReadFloat(MemoryStream stream)
+        {
+            byte[] buf = new byte[4];
+            int n = stream.Read(buf, 0, 4);
+            if (n < 4)
+            {
+                throw new InvalidOperationException("Not enough data in memory stream to read double (read " + n + " want 4)");
+            }
+            return BitConverter.ToSingle(buf, 0);
+        }
+
         //NOTE: Passing -1 to size reads the remainder of the stream into a string
         public static string ReadString(MemoryStream stream, int size)
         {

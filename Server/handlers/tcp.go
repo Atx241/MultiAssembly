@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"slices"
 
@@ -14,17 +15,15 @@ import (
 var conns []*net.Conn
 
 func HandleConn(conn *net.Conn) {
-	buf := make([]byte, 2048)
-	size := 0
+	buf := make([]byte, 65536)
 
 	var associatedPlayer *player.Player
-	var err error
 
 	connIdx := len(conns)
 	conns = append(conns, conn)
 
 	for {
-		size, err = (*conn).Read(buf)
+		size, err := (*conn).Read(buf)
 
 		if err != nil {
 			fmt.Println("TCP connection error occured: ", err.Error())
@@ -83,8 +82,16 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 			goto Corrupted
 		}
 
-		username, ok := bit.ReadString(buf, -1)
+		unLength, err := buf.ReadByte()
+		if err != nil {
+			goto Corrupted
+		}
+		username, ok := bit.ReadString(buf, int(unLength))
 		if !ok {
+			goto Corrupted
+		}
+		vehicle, err := io.ReadAll(buf)
+		if err != nil {
 			goto Corrupted
 		}
 
@@ -93,13 +100,13 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) {
 		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid, "\n")
 
 		for _, c := range conns {
-			err := TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), bit.String((*aPlayer).Username))
+			err := TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), []byte{byte(len((*aPlayer).Username))}, bit.String((*aPlayer).Username), vehicle)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
 		}
 		for _, p := range player.All() {
-			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), bit.String(p.Username))
+			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), []byte{byte(len((*aPlayer).Username))}, bit.String(p.Username), vehicle)
 			if err != nil {
 				fmt.Println(err.Error())
 			}

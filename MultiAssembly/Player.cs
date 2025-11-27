@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using System.Threading;
 //using TMPro;
 
 namespace MultiAssembly
@@ -13,21 +15,71 @@ namespace MultiAssembly
         public string UUID;
 
         private GameObject gameObject;
-        private Player(string uuid, string username)
+
+        public void CleanParts(object obj)
+        {
+            var part = (GameObject)obj;
+            //Run twice in case of dependencies
+            for (int rpt = 0; rpt < 2; rpt++)
+            {
+                Component[] components = part.GetComponents<Component>();
+                for (int i = 0; i < components.Length; i++)
+                {
+                    Component comp = components[i];
+                    if (!(comp is MeshRenderer) && !(comp is MeshFilter) && !(comp is Transform) && !(comp is PaintableRenderer) && !(comp is WingVisual))
+                    {
+                        if (comp is Behaviour b)
+                        {
+                            b.enabled = false;
+                        }
+                        else
+                        {
+                            GameObject.Destroy(comp);
+                        }
+                    }
+                }
+            }
+            foreach (Transform c in part.transform)
+            {
+                CleanParts(c.gameObject);
+            }
+        }
+        private Player(string uuid, string username, MemoryStream vehicle)
         {
             UUID = uuid;
             Username = username;
             Players.Add(this);
 
-            gameObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            gameObject.transform.localScale = Vector3.one * 4;
-            UnityEngine.Object.Destroy(gameObject.GetComponent<SphereCollider>());
+            //gameObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            //gameObject.transform.localScale = Vector3.one * 4;
+            //UnityEngine.Object.Destroy(gameObject.GetComponent<SphereCollider>());
+            gameObject = new GameObject();
 
-            //GameObject unText = new GameObject();
-            //unText.transform.SetParent(gameObject.transform, false);
-            //unText.transform.localPosition = Vector3.up * 5;
-            //TextMeshPro textComp = unText.AddComponent<TextMeshPro>();
-            //textComp.text = Username;
+            while (vehicle.Position < vehicle.Length)
+            {
+                var name = Bit.ReadString(vehicle, vehicle.ReadByte());
+                var px = Bit.ReadFloat(vehicle);
+                var py = Bit.ReadFloat(vehicle);
+                var pz = Bit.ReadFloat(vehicle);
+                var rx = Bit.ReadFloat(vehicle);
+                var ry = Bit.ReadFloat(vehicle);
+                var rz = Bit.ReadFloat(vehicle);
+                Console.WriteLine("Create player part " + name);
+                if (name == "Body")
+                {
+                    continue;
+                }
+                GameObject child = MonoBehaviour.Instantiate(PartPrefabs.GetPartPrefab(name));
+
+                child.transform.parent = gameObject.transform;
+
+                child.transform.localPosition = new Vector3(px, py, pz);
+                child.transform.localEulerAngles = new Vector3(rx, ry, rz);
+
+                Thread t = new Thread(CleanParts);
+                t.Start(child);
+                t.Join();
+            }
         }
 
         public static Player? Find(string uuid)
@@ -40,9 +92,9 @@ namespace MultiAssembly
             }
             return null;
         }
-        public static Player New(string uuid, string username)
+        public static Player New(string uuid, string username, byte[] vehicle)
         {
-            Player ret = new Player(uuid, username);
+            Player ret = new Player(uuid, username, new MemoryStream(vehicle));
             Players.Add(ret);
             Console.WriteLine("New player");
             return ret;

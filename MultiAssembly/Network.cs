@@ -15,7 +15,7 @@ namespace MultiAssembly
         public const int NetworkHertz = 60;
 
         //public static string host = "10.144.154.223";
-        public static string host = "10.144.154.223";
+        public static string host = "localhost";
         public static int tcpPort = 33333;
         public static int udpPort = 33334;
 
@@ -28,6 +28,10 @@ namespace MultiAssembly
         private static Thread? udpThread;
         private static bool shutdownThreads = false;
 
+        public static string TrimObjectName(string name)
+        {
+            return name.Replace("(Clone)", "").Trim();
+        }
         public static byte[] Bytes(params object[] objs)
         {
             return BytesFromArray(objs);
@@ -42,6 +46,9 @@ namespace MultiAssembly
                 switch (obj) {
                     case byte b:
                         ret.Add(b);
+                        break;
+                    case byte[] ba:
+                        ret.AddRange(ba);
                         break;
                     case short s:
                         next = BitConverter.GetBytes(s);
@@ -113,14 +120,22 @@ namespace MultiAssembly
                 tcp.Connect(host, tcpPort);
                 udp.Connect(host, udpPort);
 
-                SendTCP("REG_", UUID.LocalKP.Public, Plugin.Username);
+                List<byte> vehicle = new List<byte>();
 
                 GameObjects.Player = GameObject.FindFirstObjectByType<PlaneContainer>();
 
                 foreach (Transform t in GameObjects.Player.transform)
                 {
                     Console.WriteLine("Player part child: " + t.gameObject.name);
+                    string objName = TrimObjectName(t.gameObject.name);
+                    if (objName == "Body")
+                    {
+
+                    }
+                    vehicle.AddRange(Bytes((byte)objName.Length, objName, t.localPosition.x, t.localPosition.y, t.localPosition.z, t.localEulerAngles.x, t.localEulerAngles.y, t.localEulerAngles.z));
                 }
+
+                SendTCP("REG_", UUID.LocalKP.Public, (byte)Plugin.Username.Length, Plugin.Username, vehicle.ToArray());
 
                 if (loopThread != null) loopThread.Join();
                 if (tcpThread != null) tcpThread.Join();
@@ -186,7 +201,7 @@ namespace MultiAssembly
         }
         private static void tcpLoop()
         {
-            byte[] buf = new byte[1024];
+            List<byte> buf = new List<byte>();
             while (true)
             {
                 if (shutdownThreads) return;
@@ -194,11 +209,17 @@ namespace MultiAssembly
                 {
                     if (tcp.Available <= 0) goto End;
 
-                    int n = tcp.GetStream().Read(buf, 0, buf.Length);
+                    int n = 0;
+                    while (tcp.Available > 0)
+                    {
+                        byte[] tmpbuf = new byte[1024];
+                        n += tcp.GetStream().Read(tmpbuf, 0, tmpbuf.Length);
+                        buf.AddRange(tmpbuf);
+                    }
 
                     //Console.WriteLine("TCP Message: " + BitConverter.ToString(new ArraySegment<byte>(buf, 0, n).ToArray()) + "(length " + n + ")");
 
-                    MemoryStream stream = new MemoryStream((byte[])buf.Clone(), 0, n, false, true);
+                    MemoryStream stream = new MemoryStream(buf.ToArray(), 0, n, false, true);
 
                     while (stream.Position < stream.Length)
                     {
