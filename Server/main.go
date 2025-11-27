@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Multiassembly Global Server v4.")
+	fmt.Println("Multiassembly Global Server v5.")
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go tcpMain(&wg)
