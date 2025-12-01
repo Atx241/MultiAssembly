@@ -95,12 +95,15 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) b
 				fmt.Println(err.Error())
 			}
 		}
-		// for _, p := range player.Players {
-		// 	err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), []byte{byte(len(p.Username))}, bit.String(p.Username), p.Vehicle)
-		// 	if err != nil {
-		// 		fmt.Println(err.Error())
-		// 	}
-		// }
+		for _, p := range player.Players {
+			if p == *aPlayer {
+				continue
+			}
+			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), []byte{byte(len(p.Username))}, bit.String(p.Username), p.Vehicle)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}
 	case "UREG":
 		Disconnect(conn, *aPlayer)
 		return true

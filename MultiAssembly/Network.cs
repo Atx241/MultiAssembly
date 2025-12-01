@@ -160,7 +160,6 @@ namespace MultiAssembly
 
                 foreach (Transform t in GameObjects.Player.transform)
                 {
-                    Console.WriteLine("Player part child: " + t.gameObject.name);
                     string objName = TrimObjectName(t.gameObject.name);
                     if (objName == "Body")
                     {
