@@ -38,7 +38,6 @@ namespace MultiAssembly
             
             foreach (Transform c in part.transform)
             {
-                Console.WriteLine(c.gameObject.name);
                 CleanParts(c.gameObject);
             }
         }
@@ -65,7 +64,6 @@ namespace MultiAssembly
                     continue;
                 }
                 GameObject child = GameObject.Instantiate(PartPrefabs.GetPartPrefab(name));
-                Console.WriteLine("Finished creating player part " + name);
 
                 child.transform.parent = gameObject.transform;
 

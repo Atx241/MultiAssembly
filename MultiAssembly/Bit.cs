@@ -11,7 +11,6 @@ namespace MultiAssembly
     {
         public static byte[] TCPReadExactly(NetworkStream stream, int length)
         {
-            Console.WriteLine(length);
             var prevNetTimeout = stream.ReadTimeout;
             stream.ReadTimeout = Network.NetworkTimeout;
             byte[] ret = new byte[length];
@@ -19,7 +18,6 @@ namespace MultiAssembly
 
             while (n < length)
             {
-                Console.WriteLine("Must read " + (length - n) + "more bytes");
                 var read = stream.Read(ret, n, length - n);
                 if (read == 0)
                 {

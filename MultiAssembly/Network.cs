@@ -15,8 +15,8 @@ namespace MultiAssembly
         public const int NetworkHertz = 60;
         public const int NetworkTimeout = 5000;
 
-        //public static string host = "10.144.154.223";
-        public static string host = "localhost";
+        public static string host = "zserver";
+        //public static string host = "localhost";
         public static int tcpPort = 33333;
         public static int udpPort = 33334;
 
