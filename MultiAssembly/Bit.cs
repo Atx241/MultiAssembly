@@ -2,12 +2,36 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Net.Sockets;
 using System.Text;
 
 namespace MultiAssembly
 {
     internal static class Bit
     {
+        public static byte[] TCPReadExactly(NetworkStream stream, int length)
+        {
+            Console.WriteLine(length);
+            var prevNetTimeout = stream.ReadTimeout;
+            stream.ReadTimeout = Network.NetworkTimeout;
+            byte[] ret = new byte[length];
+            int n = 0;
+
+            while (n < length)
+            {
+                Console.WriteLine("Must read " + (length - n) + "more bytes");
+                var read = stream.Read(ret, n, length - n);
+                if (read == 0)
+                {
+                    throw new SocketException();
+                }
+                n += read;
+            }
+
+            stream.ReadTimeout = prevNetTimeout;
+
+            return ret;
+        }
         public static double ReadDouble(MemoryStream stream)
         {
             byte[] buf = new byte[8];

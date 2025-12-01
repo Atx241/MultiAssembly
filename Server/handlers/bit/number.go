@@ -15,7 +15,7 @@ func ReadFloat64(buf *bytes.Buffer) (float64, bool) {
 		return math.NaN(), false
 	}
 	if n < 8 {
-		fmt.Print("Error reading string: not enough data (read ", n, " want 8)\n")
+		fmt.Print("Error reading float64: not enough data (read ", n, " want 8)\n")
 		return math.NaN(), false
 	}
 	return math.Float64frombits(binary.LittleEndian.Uint64(f64)), true
@@ -41,7 +41,7 @@ func ReadUint16(buf *bytes.Buffer) (uint16, bool) {
 	u16 := make([]byte, 2)
 	n, err := buf.Read(u16)
 	if err != nil {
-		fmt.Println("Error reading float64:", err.Error())
+		fmt.Println("Error reading uint16:", err.Error())
 		return 0, false
 	}
 	if n < 2 {

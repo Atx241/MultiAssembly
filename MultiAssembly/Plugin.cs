@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 namespace MultiAssembly
 {
@@ -25,12 +26,17 @@ namespace MultiAssembly
 
         public static string Username = "N/A";
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        public static Plugin instance;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
         public new void print(object obj)
         {
             Logger.LogInfo(obj);
         }
         private void Awake()
         {
+            instance =  this;
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             Username = Environment.UserName.Trim();
             print("PublicKey: " + UUID.LocalKP.Public);
@@ -105,6 +111,10 @@ namespace MultiAssembly
             PlaneContainer player = GameObjects.Player!;
             Network.SendUDP("PTUR", (double)player.transform.eulerAngles.x, (double)player.transform.eulerAngles.y, (double)player.transform.eulerAngles.z);
             Network.SendUDP("PTUP", (double)player.transform.position.x, (double)player.transform.position.y, (double)player.transform.position.z);
+        }
+        public static void Coroutine(IEnumerator coroutine)
+        {
+            instance.StartCoroutine(coroutine);
         }
     }
 }

@@ -17,7 +17,7 @@ type Player struct {
 	Vehicle     []byte
 }
 
-var players map[string]*Player = make(map[string]*Player, 0)
+var Players map[string]*Player = make(map[string]*Player, 0)
 
 func (p Player) Remove() {
 	RemoveByID(p.PrivateUUID)
@@ -25,16 +25,13 @@ func (p Player) Remove() {
 
 func New(Username string, PrivateUUID string, PublicUUID string) *Player {
 	p := Player{Username: Username, PrivateUUID: PrivateUUID, PublicUUID: PublicUUID}
-	players[p.PrivateUUID] = &p
+	Players[p.PrivateUUID] = &p
 	return &p
 
 }
 func GetByID(privateUUID string) *Player {
-	return players[privateUUID]
+	return Players[privateUUID]
 }
 func RemoveByID(privateUUID string) {
-	delete(players, privateUUID)
-}
-func All() map[string]*Player {
-	return players
+	delete(Players, privateUUID)
 }

@@ -39,37 +39,18 @@ func Disconnect(conn *net.Conn, associatedPlayer *player.Player) {
 }
 
 func HandleConn(conn *net.Conn) {
-	buf := make([]byte, 65536)
-
 	var associatedPlayer *player.Player
 
 	conns = append(conns, conn)
-MainLoop:
 	for {
-		size, err := (*conn).Read(buf)
-
-		if err != nil {
-			fmt.Println("TCP connection error occured: ", err.Error())
+		msgLength, ok := bit.ReadUint16(bytes.NewBuffer(bit.TCPReadExactly(conn, 2)))
+		if !ok {
+			fmt.Println("TCP connection error occured")
 			Disconnect(conn, associatedPlayer)
 			break
 		}
-
-		byteBuf := bytes.NewBuffer(buf[:size])
-
-		for byteBuf.Len() > 0 {
-			size, ok := bit.ReadUint16(byteBuf)
-
-			if !ok {
-				fmt.Println("Failed to read buffer size")
-			}
-
-			tmpBuf := make([]byte, size)
-
-			byteBuf.Read(tmpBuf)
-
-			if HandleRequest(bytes.NewBuffer(tmpBuf), &associatedPlayer, conn) {
-				break MainLoop
-			}
+		if HandleRequest(bytes.NewBuffer(bit.TCPReadExactly(conn, int(msgLength))), &associatedPlayer, conn) {
+			break
 		}
 	}
 }
@@ -109,12 +90,12 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) b
 		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid, "\n")
 
 		for _, c := range conns {
-			err := TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), []byte{byte(len((*aPlayer).Username))}, bit.String((*aPlayer).Username), vehicle)
+			err := TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), []byte{byte(len((*aPlayer).Username))}, bit.String((*aPlayer).Username), (*aPlayer).Vehicle)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
 		}
-		for _, p := range player.All() {
+		for _, p := range player.Players {
 			err := TCPWrite(conn, bit.String("REG_"), bit.String(p.PublicUUID), []byte{byte(len(p.Username))}, bit.String(p.Username), p.Vehicle)
 			if err != nil {
 				fmt.Println(err.Error())

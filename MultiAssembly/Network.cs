@@ -15,8 +15,8 @@ namespace MultiAssembly
         public const int NetworkHertz = 60;
         public const int NetworkTimeout = 5000;
 
-        public static string host = "10.144.154.223";
-        //public static string host = "localhost";
+        //public static string host = "10.144.154.223";
+        public static string host = "localhost";
         public static int tcpPort = 33333;
         public static int udpPort = 33334;
 
@@ -169,6 +169,10 @@ namespace MultiAssembly
                     vehicle.AddRange(Bytes((byte)objName.Length, objName, t.localPosition.x, t.localPosition.y, t.localPosition.z, t.localEulerAngles.x, t.localEulerAngles.y, t.localEulerAngles.z));
                 }
 
+                //Uncomment the below line of code to create testing vehicle files for use in the Mock Player application
+                //MPV stands for Mock Player Vehicle
+                //File.WriteAllBytes("vehicle.mpv", vehicle.ToArray());
+
                 SendTCP("REG_", UUID.LocalKP.Public, (byte)Plugin.Username.Length, Plugin.Username, vehicle.ToArray());
 
                 if (loopThread != null) loopThread.Join();
@@ -243,28 +247,11 @@ namespace MultiAssembly
                 {
                     if (tcp.Available <= 0) goto End;
 
-                    int n = 0;
-                    while (tcp.Available > 0)
-                    {
-                        byte[] tmpbuf = new byte[1024];
-                        n += tcp.GetStream().Read(tmpbuf, 0, tmpbuf.Length);
-                        buf.AddRange(tmpbuf);
-                    }
+                    ushort msgLength = Bit.ReadUShort(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 2)));
 
-                    //Console.WriteLine("TCP Message: " + BitConverter.ToString(new ArraySegment<byte>(buf, 0, n).ToArray()) + "(length " + n + ")");
+                    MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), msgLength));
+                    TCP.Run(Bit.ReadString(stream, 4), stream);
 
-                    MemoryStream stream = new MemoryStream(buf.ToArray(), 0, n, false, true);
-
-                    while (stream.Position < stream.Length)
-                    {
-                        ushort packetLength = Bit.ReadUShort(stream);
-
-                        MemoryStream tmpStream = new MemoryStream(stream.GetBuffer(), (int)stream.Position, packetLength, false);
-
-                        stream.Position += packetLength;
-
-                        TCP.Run(Utility.ReadFCFI(tmpStream), tmpStream);
-                    }
                 } catch (Exception e)
                 {
                     Console.WriteLine("TCP Exception occured: " + e.ToString());

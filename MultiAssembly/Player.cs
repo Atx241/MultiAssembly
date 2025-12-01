@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Threading;
+using System.Collections;
 //using TMPro;
 
 namespace MultiAssembly
@@ -16,32 +17,28 @@ namespace MultiAssembly
 
         private GameObject gameObject;
 
-        //Use this discretely for each component instead of deleting multiple components with one loop to prevent unity shenanigans
-        public void CleanComponent<T>(GameObject go, Component[] components) where T : Component
-        {
-            for (int i = 0; i < components.Length; i++)
-            {
-                Component comp = components[i];
-                switch (comp)
-                {
-                    case T t:
-                        GameObject.DestroyImmediate(t, false);
-                        break;
-                }
-            }
-        }
-
         public void CleanParts(object obj)
         {
             var part = (GameObject)obj;
             Component[] components = part.GetComponents<Component>();
+            List<Component> componentsToDestroy = new List<Component>();
 
-            //These are the only two erroneous components found yet. If more are found add them here
-            CleanComponent<Wheel>(part, components);
-            CleanComponent<Collider>(part, components);
+            foreach (var comp in components)
+            {
+                if ((comp is Collider) || (comp is Wheel))
+                {
+                    componentsToDestroy.Add(comp);
+                }
+            }
+
+            foreach (var comp in componentsToDestroy)
+            {
+                GameObject.Destroy(comp);
+            }
             
             foreach (Transform c in part.transform)
             {
+                Console.WriteLine(c.gameObject.name);
                 CleanParts(c.gameObject);
             }
         }
@@ -68,6 +65,7 @@ namespace MultiAssembly
                     continue;
                 }
                 GameObject child = GameObject.Instantiate(PartPrefabs.GetPartPrefab(name));
+                Console.WriteLine("Finished creating player part " + name);
 
                 child.transform.parent = gameObject.transform;
 
@@ -91,6 +89,7 @@ namespace MultiAssembly
             }
             return null;
         }
+        //NOTE: Ensure that this runs on the main thread, otherwise it has a chance to crash the game.
         public static Player New(string uuid, string username, byte[] vehicle)
         {
             Player ret = new Player(uuid, username, new MemoryStream(vehicle));

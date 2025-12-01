@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -31,6 +32,13 @@ namespace MultiAssembly.Handlers
             Console.WriteLine("Vehicle length " + vehicle.Length);
             if (Player.Find(uuid) != null) return;
             Console.WriteLine("Registered new player:\nUUID: " + uuid + "\nUsername: \"" + username + "\"");
+            //Run a coroutine to register and delay on main thread, otherwise vehicle creation crashes game
+            Plugin.Coroutine(registerPlayerCR(uuid, username, vehicle));
+        }
+        private static IEnumerator registerPlayerCR(string uuid, string username, byte[] vehicle)
+        {
+            //Delay to allow Unity to set up the scene
+            yield return null;
             Player.New(uuid, username, vehicle);
         }
         private static void unregisterPlayer(MemoryStream stream)

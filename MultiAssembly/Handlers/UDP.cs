@@ -32,7 +32,8 @@ namespace MultiAssembly.Handlers
             float y = (float)Bit.ReadDouble(stream);
             float z = (float)Bit.ReadDouble(stream);
             Player? p = Player.Find(uuid);
-            if (p == null)
+            //Check for null transform because of Unity cleanup
+            if (p == null || p.GetGameObject().transform == null)
             {
                 return;
                 //throw new PlayerNotFoundException(uuid);
@@ -46,7 +47,7 @@ namespace MultiAssembly.Handlers
             float y = (float)Bit.ReadDouble(stream);
             float z = (float)Bit.ReadDouble(stream);
             Player? p = Player.Find(uuid);
-            if (p == null)
+            if (p == null || p.GetGameObject().transform == null)
             {
                 return;
                 //throw new PlayerNotFoundException(uuid);
