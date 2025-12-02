@@ -13,6 +13,10 @@ import (
 
 //go:embed bepinex.zip
 var bepinexFile []byte
+
+//go:embed MultiAssembly.dll
+var multiAssemblyFile []byte
+
 var aviassemblyFolder = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Aviassembly"
 
 func main() {
@@ -21,9 +25,12 @@ func main() {
 		hangAndClose(1)
 		return
 	}
-	fmt.Println("Aviassembly folder found")
+	fmt.Println("Aviassembly folder found. Extracting...")
 	extBepinex()
 	extMod()
+	fmt.Println("--------")
+	fmt.Println("Successfully installed the MultiAssembly mod")
+	fmt.Println("Please start and quit Aviassembly to finish setup. The mod should be functioning afterwards.")
 	hangAndClose(0)
 }
 
@@ -59,11 +66,21 @@ func extBepinex() {
 		}
 		zfile, err := f.Open()
 		if err != nil {
-			fmt.Println("Cannot read internal zip file.")
+			fmt.Println("Cannot read internal zip file")
 			hangAndClose(1)
 		}
 		dat, _ := io.ReadAll(zfile)
 		os.WriteFile(aviassemblyFolder+string(os.PathSeparator)+strings.Join(segs, string(os.PathSeparator)), dat, 0777)
 	}
 
+}
+func extMod() {
+	if _, err := os.Stat(aviassemblyFolder + "\\BepInEx\\plugins"); os.IsNotExist(err) {
+		os.Mkdir(aviassemblyFolder+"\\BepInEx\\plugins", 0777)
+	}
+	err := os.WriteFile(aviassemblyFolder+"\\BepInEx\\plugins\\MultiAssembly.dll", multiAssemblyFile, 0777)
+	if err != nil {
+		fmt.Println("Failed to write MultiAssembly dll to the BepInEx plugins folder")
+		hangAndClose(1)
+	}
 }
