@@ -248,7 +248,7 @@ namespace MultiAssembly
                 if (shutdownThreads) return;
                 if (GameObjects.Player != null)
                 {
-                    Plugin.PlayerLoop();
+                    Plugin.MainThreadTask(Plugin.PlayerLoop);
                 }
                 Thread.Sleep(1000 / NetworkHertz);
             }
@@ -266,7 +266,7 @@ namespace MultiAssembly
                     ushort msgLength = Bit.ReadUShort(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 4)));
 
                     MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), msgLength));
-                    TCP.Run(Bit.ReadString(stream, 4), stream);
+                    Plugin.MainThreadTask(() => TCP.Run(Bit.ReadString(stream, 4), stream));
 
                 }
                 catch (Exception e)
@@ -293,7 +293,7 @@ namespace MultiAssembly
 
                         MemoryStream stream = new MemoryStream((byte[])buf.Clone());
 
-                        UDP.Run(Utility.ReadFCFI(stream), stream);
+                        Plugin.MainThreadTask(() => UDP.Run(Utility.ReadFCFI(stream), stream));
                     }
                 }
                 catch (Exception e)

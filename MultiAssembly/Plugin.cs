@@ -5,16 +5,18 @@ using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace MultiAssembly
 {
-    [BepInPlugin("atxmedia.globiassembly", "GlobiAssembly", "1.0.0.0")]
+    [BepInPlugin("atxmedia.globiassembly", "GlobiAssembly", "1.0.0.1")]
     public class Plugin : BaseUnityPlugin
     {
         //Increment this for every major version (should only be incrememented at most every six months and only for large reworks or additions)
         public const int VersionMajor = 1;
         //Increment this for every minor version (should be incremented at most every month and only for important, but not essential reworks or additions)
-        public const int VersionMinor = 0;
+        public const int VersionMinor = 1;
         //Increment this for every patch (patches are announced changes that don't fit into the major or minor categories)
         public const int VersionPatch = 0;
 
@@ -33,6 +35,28 @@ namespace MultiAssembly
         public new void print(object obj)
         {
             Logger.LogInfo(obj);
+        }
+        static ConcurrentQueue<Action> mainThreadQueue = new ConcurrentQueue<Action>();
+        public static void MainThreadTask(Action func)
+        {
+            mainThreadQueue.Enqueue(func);
+        }
+        private void Update()
+        {
+            while (mainThreadQueue.Count > 0)
+            {
+                var success = mainThreadQueue.TryDequeue(out Action func);
+                if (!success)
+                {
+                    continue;
+                }
+                if (func == null)
+                {
+                    Console.WriteLine("Function null!");
+                    continue;
+                }
+                func();
+            }
         }
         private void Awake()
         {
@@ -107,17 +131,13 @@ namespace MultiAssembly
                 Network.Disconnect();
             }
         }
-
+        //Thread-safe loop for unity tasks
         public static void PlayerLoop()
         {
             PlaneContainer player = GameObjects.Player!;
             Network.SendUDP("PTUR", (double)player.transform.eulerAngles.x, (double)player.transform.eulerAngles.y, (double)player.transform.eulerAngles.z);
             Network.SendUDP("PTUP", (double)player.transform.position.x, (double)player.transform.position.y, (double)player.transform.position.z);
             UI.Loop();
-        }
-        public static void Coroutine(IEnumerator coroutine)
-        {
-            instance.StartCoroutine(coroutine);
         }
     }
 }
