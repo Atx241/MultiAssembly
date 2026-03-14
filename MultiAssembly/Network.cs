@@ -179,6 +179,8 @@ namespace MultiAssembly
                         var s1 = body.AppliedTransform.side1;
                         var s2 = body.AppliedTransform.side2;
                         vehicle.AddRange(Bytes(s1.radius, s2.radius, s1.lengthOffset, s2.lengthOffset, s1.roundness, s2.roundness));
+                        Console.WriteLine("Body components:");
+                        GameObjects.PrintComponents(t.gameObject);
                     }
 
                 }

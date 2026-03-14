@@ -59,22 +59,38 @@ namespace MultiAssembly
                 var ry = Bit.ReadFloat(vehicle);
                 var rz = Bit.ReadFloat(vehicle);
                 Console.WriteLine("Create player part " + name);
-                if (name == "Body")
-                {
-                    var radius1 = Bit.ReadVector2(vehicle);
-                    var radius2 = Bit.ReadVector2(vehicle);
-                    var lengthOffset1 = Bit.ReadVector3(vehicle);
-                    var lengthOffset2 = Bit.ReadVector3(vehicle);
-                    var roudness1 = Bit.ReadVector4(vehicle);
-                    var roudness2 = Bit.ReadVector4(vehicle);
-                    continue;
-                }
                 GameObject child = GameObject.Instantiate(PartPrefabs.GetPartPrefab(name));
 
                 child.transform.parent = gameObject.transform;
 
                 child.transform.localPosition = new Vector3(px, py, pz);
                 child.transform.localEulerAngles = new Vector3(rx, ry, rz);
+
+                if (name == "Body")
+                {
+                    var radius1 = Bit.ReadVector2(vehicle);
+                    var radius2 = Bit.ReadVector2(vehicle);
+                    var lengthOffset1 = Bit.ReadVector3(vehicle);
+                    var lengthOffset2 = Bit.ReadVector3(vehicle);
+                    var roundness1 = Bit.ReadVector4(vehicle);
+                    var roundness2 = Bit.ReadVector4(vehicle);
+                    var pFuselage = child.GetComponent<ProceduralFuselage>();
+                    pFuselage.appliedTransform.side1 = new ProceduralFuselageSide();
+                    pFuselage.appliedTransform.side2 = new ProceduralFuselageSide();
+
+                    pFuselage.appliedTransform.side1.radius = radius1;
+                    pFuselage.appliedTransform.side2.radius = radius2;
+
+                    pFuselage.appliedTransform.side1.lengthOffset = lengthOffset1;
+                    pFuselage.appliedTransform.side2.lengthOffset = lengthOffset2;
+
+                    pFuselage.appliedTransform.side1.roundness = roundness1;
+                    pFuselage.appliedTransform.side2.roundness = roundness2;
+
+                    child.GetComponent<ProceduralFuselageMesh>().UpdateMesh(pFuselage.AppliedTransform);
+
+
+                }
 
                 //Thread t = new Thread(CleanParts);
                 //t.Start(child);
