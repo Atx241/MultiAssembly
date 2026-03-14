@@ -36,6 +36,13 @@ func Uint16(u uint16) []byte {
 	bit2 := byte(u >> 8)
 	return []byte{bit1, bit2}
 }
+func Uint32(u uint32) []byte {
+	bit1 := byte(u)
+	bit2 := byte(u >> 8)
+	bit3 := byte(u >> 16)
+	bit4 := byte(u >> 24)
+	return []byte{bit1, bit2, bit3, bit4}
+}
 
 func ReadUint16(buf *bytes.Buffer) (uint16, bool) {
 	u16 := make([]byte, 2)

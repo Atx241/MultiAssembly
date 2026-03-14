@@ -121,7 +121,7 @@ func TCPWrite(conn *net.Conn, bytes ...[]byte) error {
 		return errors.New("TCP connection is nil")
 	}
 	data := bit.M(bytes...)
-	_, err := (*conn).Write(bit.M(bit.Uint16(uint16(len(data))), data))
+	_, err := (*conn).Write(bit.M(bit.Uint32(uint32(len(data))), data))
 	if err != nil {
 		return err
 	}
