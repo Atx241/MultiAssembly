@@ -4,6 +4,8 @@ using System.IO;
 using UnityEngine;
 using System.Threading;
 using System.Collections;
+using TMPro;
+using System.Reflection.Emit;
 //using TMPro;
 
 namespace MultiAssembly
@@ -14,6 +16,8 @@ namespace MultiAssembly
 
         public string Username;
         public string UUID;
+
+        public TextMeshProUGUI? LabelTMP;
 
         private GameObject gameObject;
 
@@ -59,7 +63,13 @@ namespace MultiAssembly
                 var ry = Bit.ReadFloat(vehicle);
                 var rz = Bit.ReadFloat(vehicle);
                 Console.WriteLine("Create player part " + name);
-                GameObject child = GameObject.Instantiate(PartPrefabs.GetPartPrefab(name));
+                GameObject prefab = PartPrefabs.GetPartPrefab(name);
+                if (prefab == null)
+                {
+                    continue;
+                }
+                GameObject child = GameObject.Instantiate(prefab);
+
 
                 child.transform.parent = gameObject.transform;
 
@@ -96,7 +106,22 @@ namespace MultiAssembly
                 //t.Start(child);
                 //t.Join();
                 CleanParts(child);
+                initUI();
             }
+        }
+        private void initUI()
+        {
+            LabelTMP = new GameObject("PLabel" + UUID, typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+            LabelTMP.transform.SetParent(UI.NetworkingCanvas!.transform, false);
+            LabelTMP.text = Username;
+            LabelTMP.rectTransform.anchorMin = new Vector2(0, 0);
+            LabelTMP.rectTransform.anchorMax = LabelTMP.rectTransform.anchorMin;
+            LabelTMP.rectTransform.anchoredPosition = new Vector2(0, 0);
+            LabelTMP.rectTransform.sizeDelta = new Vector2(600, 200);
+            LabelTMP.horizontalAlignment = HorizontalAlignmentOptions.Center;
+            LabelTMP.color = Color.cyan;
+            LabelTMP.fontSize = 30;
+            LabelTMP.fontWeight = FontWeight.Heavy;
         }
 
         public static Player? Find(string uuid)
@@ -127,6 +152,7 @@ namespace MultiAssembly
         {
             Players.Remove(this);
             UnityEngine.Object.Destroy(gameObject);
+            UnityEngine.Object.Destroy(LabelTMP);
         }
 
         ~Player()

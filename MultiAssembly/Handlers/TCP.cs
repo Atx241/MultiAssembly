@@ -17,7 +17,8 @@ namespace MultiAssembly.Handlers
 
         public static void Run(string fcfi, MemoryStream stream)
         {
-            if (!functions.TryGetValue(fcfi, out Action<MemoryStream> func)) {
+            if (!functions.TryGetValue(fcfi, out Action<MemoryStream> func))
+            {
                 throw new HandlerNotFoundException(fcfi);
             }
             func(stream);
@@ -26,6 +27,10 @@ namespace MultiAssembly.Handlers
         private static void registerPlayer(MemoryStream stream)
         {
             string uuid = Bit.ReadString(stream, UUID.UUIDLength);
+            if (uuid == UUID.LocalKP.Public)
+            {
+                return;
+            }
             string username = Bit.ReadString(stream, stream.ReadByte());
             byte[] vehicle = new byte[stream.Length - stream.Position];
             stream.Read(vehicle, 0, vehicle.Length);

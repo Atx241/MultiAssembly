@@ -28,11 +28,12 @@ namespace MultiAssembly.Handlers
         private static void playerTransformUpdatePosition(MemoryStream stream)
         {
             string uuid = Bit.ReadString(stream, UUID.UUIDLength);
+
             float x = (float)Bit.ReadDouble(stream);
             float y = (float)Bit.ReadDouble(stream);
             float z = (float)Bit.ReadDouble(stream);
             Player? p = Player.Find(uuid);
-            //Check for null transform because of Unity cleanup
+            //Check for null transform because of Unity cleanup and ghosting
             if (p == null || p.GetGameObject().transform == null)
             {
                 return;

@@ -113,6 +113,7 @@ namespace MultiAssembly
             PlaneContainer player = GameObjects.Player!;
             Network.SendUDP("PTUR", (double)player.transform.eulerAngles.x, (double)player.transform.eulerAngles.y, (double)player.transform.eulerAngles.z);
             Network.SendUDP("PTUP", (double)player.transform.position.x, (double)player.transform.position.y, (double)player.transform.position.z);
+            UI.Loop();
         }
         public static void Coroutine(IEnumerator coroutine)
         {
