@@ -109,7 +109,7 @@ namespace MultiAssembly
             List<byte> bytes = new List<byte>();
             bytes.AddRange(Bytes(UUID.LocalKP.Private, fcfi));
             bytes.AddRange(BytesFromArray(objs));
-            var tmp = new List<byte>(Bytes((ushort)bytes.Count));
+            var tmp = new List<byte>(Bytes((uint)bytes.Count));
             tmp.AddRange(bytes);
             bytes = tmp;
             tcp.GetStream().Write(bytes.ToArray(), 0, bytes.Count);
@@ -263,7 +263,7 @@ namespace MultiAssembly
                 {
                     if (tcp.Available <= 0) goto End;
 
-                    ushort msgLength = Bit.ReadUShort(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 2)));
+                    ushort msgLength = Bit.ReadUShort(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 4)));
 
                     MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), msgLength));
                     TCP.Run(Bit.ReadString(stream, 4), stream);

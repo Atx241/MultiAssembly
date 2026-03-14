@@ -50,3 +50,17 @@ func ReadUint16(buf *bytes.Buffer) (uint16, bool) {
 	}
 	return binary.LittleEndian.Uint16(u16), true
 }
+
+func ReadUint32(buf *bytes.Buffer) (uint32, bool) {
+	u32 := make([]byte, 4)
+	n, err := buf.Read(u32)
+	if err != nil {
+		fmt.Println("Error reading uint32:", err.Error())
+		return 0, false
+	}
+	if n < 4 {
+		fmt.Print("Error reading string: not enough data (read ", n, " want 4)\n")
+		return 0, false
+	}
+	return binary.LittleEndian.Uint32(u32), true
+}
