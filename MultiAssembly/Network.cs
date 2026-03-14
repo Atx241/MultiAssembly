@@ -7,6 +7,7 @@ using System.Threading;
 using MultiAssembly.Handlers;
 using System.IO;
 using System.Net;
+using System.Reflection;
 
 namespace MultiAssembly
 {
@@ -44,7 +45,8 @@ namespace MultiAssembly
             foreach (var obj in objs)
             {
                 byte[] next = { };
-                switch (obj) {
+                switch (obj)
+                {
                     case byte b:
                         ret.Add(b);
                         break;
@@ -80,6 +82,15 @@ namespace MultiAssembly
                         break;
                     case string str:
                         next = Encoding.UTF8.GetBytes(str);
+                        break;
+                    case Vector2 vec2:
+                        next = Bytes(vec2.x, vec2.y);
+                        break;
+                    case Vector3 vec3:
+                        next = Bytes(vec3.x, vec3.y, vec3.z);
+                        break;
+                    case Vector4 vec4:
+                        next = Bytes(vec4.x, vec4.y, vec4.z, vec4.w);
                         break;
                     default:
                         throw new Exception("Bytes() encountered an invalid type (" + obj.GetType().ToString() + ")");
@@ -130,7 +141,7 @@ namespace MultiAssembly
                         }
                         return;
                     }
-                } 
+                }
                 catch (SocketException)
                 {
                     if (UI.DataText != null)
@@ -161,11 +172,15 @@ namespace MultiAssembly
                 foreach (Transform t in GameObjects.Player.transform)
                 {
                     string objName = TrimObjectName(t.gameObject.name);
+                    vehicle.AddRange(Bytes((byte)objName.Length, objName, t.localPosition.x, t.localPosition.y, t.localPosition.z, t.localEulerAngles.x, t.localEulerAngles.y, t.localEulerAngles.z));
                     if (objName == "Body")
                     {
-
+                        var body = t.gameObject.GetComponent<ProceduralFuselage>();
+                        var s1 = body.AppliedTransform.side1;
+                        var s2 = body.AppliedTransform.side2;
+                        vehicle.AddRange(Bytes(s1.radius, s2.radius, s1.lengthOffset, s2.lengthOffset, s1.roundness, s2.roundness));
                     }
-                    vehicle.AddRange(Bytes((byte)objName.Length, objName, t.localPosition.x, t.localPosition.y, t.localPosition.z, t.localEulerAngles.x, t.localEulerAngles.y, t.localEulerAngles.z));
+
                 }
 
                 //Uncomment the below line of code to create testing vehicle files for use in the Mock Player application
@@ -251,7 +266,8 @@ namespace MultiAssembly
                     MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), msgLength));
                     TCP.Run(Bit.ReadString(stream, 4), stream);
 
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine("TCP Exception occured: " + e.ToString());
                 }
@@ -277,7 +293,8 @@ namespace MultiAssembly
 
                         UDP.Run(Utility.ReadFCFI(stream), stream);
                     }
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine("UDP Exception occured: " + e.ToString());
                 }

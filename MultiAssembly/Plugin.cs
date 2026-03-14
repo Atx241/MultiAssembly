@@ -36,7 +36,7 @@ namespace MultiAssembly
         }
         private void Awake()
         {
-            instance =  this;
+            instance = this;
             AppDomain.CurrentDomain.ProcessExit += OnExit;
             Username = Environment.UserName.Trim();
             print("PublicKey: " + UUID.LocalKP.Public);
@@ -57,7 +57,8 @@ namespace MultiAssembly
                 if (scene.name == "Flying")
                 {
                     GameLoad();
-                } else if (scene.name == "Menu")
+                }
+                else if (scene.name == "Menu")
                 {
                     menuCanvas = GameObject.Find("Menu Canvas").GetComponent<Canvas>();
 
@@ -69,9 +70,10 @@ namespace MultiAssembly
 
                     creditText = new GameObject("MultiAssemblyCreditText", typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
                     creditText.transform.parent = menuCanvas.transform;
-                    creditText.rectTransform.anchorMin = Vector2.zero;
-                    creditText.rectTransform.anchorMax = Vector2.zero;
+                    creditText.rectTransform.anchorMin = new Vector2(0, 0.5f);
+                    creditText.rectTransform.anchorMax = new Vector2(0, 0.5f);
                     creditText.rectTransform.anchoredPosition = new Vector2(100, 0);
+                    creditText.rectTransform.pivot = new Vector2(0, 1);
                     creditText.rectTransform.sizeDelta = new Vector2(600, 400);
                     creditText.text = "Multiplayer powered by AtxMedia\nVersion " + VersionMajor + "." + VersionMinor + "." + VersionPatch + " inc " + VersionInc;
                     creditText.fontSize = 18;

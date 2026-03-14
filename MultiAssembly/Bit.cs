@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using UnityEngine;
 
 namespace MultiAssembly
 {
@@ -56,7 +57,8 @@ namespace MultiAssembly
         public static string ReadString(MemoryStream stream, int size)
         {
             int _size = size;
-            if (size == -1) {
+            if (size == -1)
+            {
                 _size = (int)(stream.Length - stream.Position);
             }
             byte[] buf = new byte[_size];
@@ -84,6 +86,18 @@ namespace MultiAssembly
                 throw new InvalidOperationException("Not enough data in memory stream to read double (read " + n + " want 2)");
             }
             return BitConverter.ToUInt16(buf);
+        }
+        public static Vector2 ReadVector2(MemoryStream stream)
+        {
+            return new Vector2(ReadFloat(stream), ReadFloat(stream));
+        }
+        public static Vector3 ReadVector3(MemoryStream stream)
+        {
+            return new Vector3(ReadFloat(stream), ReadFloat(stream), ReadFloat(stream));
+        }
+        public static Vector4 ReadVector4(MemoryStream stream)
+        {
+            return new Vector4(ReadFloat(stream), ReadFloat(stream), ReadFloat(stream), ReadFloat(stream));
         }
     }
 }

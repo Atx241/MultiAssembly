@@ -35,7 +35,7 @@ namespace MultiAssembly
             {
                 GameObject.Destroy(comp);
             }
-            
+
             foreach (Transform c in part.transform)
             {
                 CleanParts(c.gameObject);
@@ -61,6 +61,12 @@ namespace MultiAssembly
                 Console.WriteLine("Create player part " + name);
                 if (name == "Body")
                 {
+                    var radius1 = Bit.ReadVector2(vehicle);
+                    var radius2 = Bit.ReadVector2(vehicle);
+                    var lengthOffset1 = Bit.ReadVector3(vehicle);
+                    var lengthOffset2 = Bit.ReadVector3(vehicle);
+                    var roudness1 = Bit.ReadVector4(vehicle);
+                    var roudness2 = Bit.ReadVector4(vehicle);
                     continue;
                 }
                 GameObject child = GameObject.Instantiate(PartPrefabs.GetPartPrefab(name));
@@ -81,7 +87,8 @@ namespace MultiAssembly
         {
             foreach (Player p in Players)
             {
-                if (p.UUID == uuid) {
+                if (p.UUID == uuid)
+                {
                     return p;
                 }
             }
@@ -106,7 +113,8 @@ namespace MultiAssembly
             UnityEngine.Object.Destroy(gameObject);
         }
 
-        ~Player() {
+        ~Player()
+        {
             Destroy();
         }
     }
