@@ -49,7 +49,7 @@ namespace MultiAssembly.Handlers
             Player? p = Player.Find(uuid);
             if (p != null)
             {
-                Player.Players.Remove(p);
+                p.Destroy();
             }
         }
     }

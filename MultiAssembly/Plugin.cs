@@ -52,7 +52,6 @@ namespace MultiAssembly
                 }
                 if (func == null)
                 {
-                    Console.WriteLine("Function null!");
                     continue;
                 }
                 func();

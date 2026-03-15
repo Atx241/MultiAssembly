@@ -246,10 +246,7 @@ namespace MultiAssembly
             while (true)
             {
                 if (shutdownThreads) return;
-                if (GameObjects.Player != null)
-                {
-                    Plugin.MainThreadTask(Plugin.PlayerLoop);
-                }
+                Plugin.MainThreadTask(() => { if (GameObjects.Player == null) return; Plugin.PlayerLoop(); });
                 Thread.Sleep(1000 / NetworkHertz);
             }
         }

@@ -56,6 +56,12 @@ namespace MultiAssembly
             while (vehicle.Position < vehicle.Length)
             {
                 var name = Bit.ReadString(vehicle, vehicle.ReadByte());
+                GameObject prefab = PartPrefabs.GetPartPrefab(name);
+                if (prefab == null)
+                {
+                    Console.WriteLine("Invalid vehicle for " + uuid + ", aborting creation");
+                    break;
+                }
                 var px = Bit.ReadFloat(vehicle);
                 var py = Bit.ReadFloat(vehicle);
                 var pz = Bit.ReadFloat(vehicle);
@@ -63,13 +69,7 @@ namespace MultiAssembly
                 var ry = Bit.ReadFloat(vehicle);
                 var rz = Bit.ReadFloat(vehicle);
                 Console.WriteLine("Create player part " + name);
-                GameObject prefab = PartPrefabs.GetPartPrefab(name);
-                if (prefab == null)
-                {
-                    continue;
-                }
                 GameObject child = GameObject.Instantiate(prefab);
-
 
                 child.transform.parent = gameObject.transform;
 
@@ -106,8 +106,8 @@ namespace MultiAssembly
                 //t.Start(child);
                 //t.Join();
                 CleanParts(child);
-                initUI();
             }
+            initUI();
         }
         private void initUI()
         {

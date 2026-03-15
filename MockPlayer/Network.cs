@@ -67,7 +67,7 @@ internal static class Network
         List<byte> bytes = new List<byte>();
         bytes.AddRange(Bytes(UUID.LocalKP.Private, fcfi));
         bytes.AddRange(BytesFromArray(objs));
-        var tmp = new List<byte>(Bytes((ushort)bytes.Count));
+        var tmp = new List<byte>(Bytes((uint)bytes.Count));
         tmp.AddRange(bytes);
         bytes = tmp;
         Plugin.tcp.GetStream().Write(bytes.ToArray(), 0, bytes.Count);
