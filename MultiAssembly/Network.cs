@@ -221,9 +221,9 @@ namespace MultiAssembly
             SendTCP("UREG", UUID.LocalKP.Public);
 
             shutdownThreads = true;
-            if (loopThread != null) loopThread.Join();
-            if (tcpThread != null) tcpThread.Join();
-            if (udpThread != null) udpThread.Join();
+            loopThread?.Join();
+            tcpThread?.Join();
+            udpThread?.Join();
             shutdownThreads = false;
 
             loopThread = null;
@@ -263,7 +263,7 @@ namespace MultiAssembly
                     ushort msgLength = Bit.ReadUShort(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 4)));
 
                     MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), msgLength));
-                    Plugin.MainThreadTask(() => TCP.Run(Bit.ReadString(stream, 4), stream));
+                    TCP.Run(Bit.ReadString(stream, 4), stream);
 
                 }
                 catch (Exception e)
@@ -290,7 +290,7 @@ namespace MultiAssembly
 
                         MemoryStream stream = new MemoryStream((byte[])buf.Clone());
 
-                        Plugin.MainThreadTask(() => UDP.Run(Utility.ReadFCFI(stream), stream));
+                        UDP.Run(Utility.ReadFCFI(stream), stream);
                     }
                 }
                 catch (Exception e)

@@ -18,10 +18,10 @@ namespace MultiAssembly
         //Increment this for every minor version (should be incremented at most every month and only for important, but not essential reworks or additions)
         public const int VersionMinor = 1;
         //Increment this for every patch (patches are announced changes that don't fit into the major or minor categories)
-        public const int VersionPatch = 0;
+        public const int VersionPatch = 1;
 
         //Increment this every time a non-announced/small change has been made
-        public const int VersionInc = 1;
+        public const int VersionInc = 2;
 
         private static TextMeshProUGUI? creditText;
         private static Canvas? menuCanvas;

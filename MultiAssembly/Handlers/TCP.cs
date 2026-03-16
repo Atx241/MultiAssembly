@@ -21,7 +21,7 @@ namespace MultiAssembly.Handlers
             {
                 throw new HandlerNotFoundException(fcfi);
             }
-            func(stream);
+            Plugin.MainThreadTask(() => func(stream));
         }
 
         private static void registerPlayer(MemoryStream stream)
