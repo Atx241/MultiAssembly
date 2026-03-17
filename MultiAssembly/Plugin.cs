@@ -23,6 +23,9 @@ namespace MultiAssembly
         //Increment this every time a non-announced/small change has been made
         public const int VersionInc = 1;
 
+        //Set this to false for release builds
+        public const bool Ghosting = true;
+
         private static TextMeshProUGUI? creditText;
         private static Canvas? menuCanvas;
 

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Collections;
 using TMPro;
 using System.Reflection.Emit;
+using System.Text;
 //using TMPro;
 
 namespace MultiAssembly
@@ -59,7 +60,7 @@ namespace MultiAssembly
                 GameObject prefab = PartPrefabs.GetPartPrefab(name);
                 if (prefab == null)
                 {
-                    Console.WriteLine("Invalid vehicle for " + uuid + ", aborting creation");
+                    Console.WriteLine("Invalid vehicle for " + uuid + ", aborting creation (last part name:" + name + ". Next 64 bytes: [" + Encoding.UTF8.GetString(Bit.ReadExactly(vehicle, 64)) + "])");
                     break;
                 }
                 var px = Bit.ReadFloat(vehicle);

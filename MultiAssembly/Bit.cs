@@ -31,6 +31,12 @@ namespace MultiAssembly
 
             return ret;
         }
+        public static byte[] ReadExactly(MemoryStream stream, int length)
+        {
+            var buf = new byte[length];
+            stream.Read(buf);
+            return buf;
+        }
         public static double ReadDouble(MemoryStream stream)
         {
             byte[] buf = new byte[8];
@@ -86,6 +92,26 @@ namespace MultiAssembly
                 throw new InvalidOperationException("Not enough data in memory stream to read double (read " + n + " want 2)");
             }
             return BitConverter.ToUInt16(buf);
+        }
+        public static uint ReadUInt(MemoryStream stream)
+        {
+            byte[] buf = new byte[4];
+            int n = stream.Read(buf, 0, 4);
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                byte[] tmpbuf = buf;
+                buf[3] = tmpbuf[0];
+                buf[2] = tmpbuf[1];
+                buf[1] = tmpbuf[2];
+                buf[0] = tmpbuf[3];
+            }
+
+            if (n < 4)
+            {
+                throw new InvalidOperationException("Not enough data in memory stream to read double (read " + n + " want 2)");
+            }
+            return BitConverter.ToUInt32(buf);
         }
         public static Vector2 ReadVector2(MemoryStream stream)
         {

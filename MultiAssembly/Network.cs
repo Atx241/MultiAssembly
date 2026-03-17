@@ -260,9 +260,9 @@ namespace MultiAssembly
                 {
                     if (tcp.Available <= 0) goto End;
 
-                    ushort msgLength = Bit.ReadUShort(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 4)));
+                    uint msgLength = Bit.ReadUInt(new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), 4)));
 
-                    MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), msgLength));
+                    MemoryStream stream = new MemoryStream(Bit.TCPReadExactly(tcp.GetStream(), (int)msgLength));
                     TCP.Run(Bit.ReadString(stream, 4), stream);
 
                 }

@@ -27,7 +27,7 @@ namespace MultiAssembly.Handlers
         private static void registerPlayer(MemoryStream stream)
         {
             string uuid = Bit.ReadString(stream, UUID.UUIDLength);
-            if (uuid == UUID.LocalKP.Public)
+            if (uuid == UUID.LocalKP.Public && !Plugin.Ghosting)
             {
                 return;
             }
