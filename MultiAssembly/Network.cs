@@ -14,7 +14,7 @@ namespace MultiAssembly
     internal static class Network
     {
         public const int NetworkHertz = 60;
-        public const int NetworkTimeout = 5000;
+        public const int NetworkTimeout = 30000;
 
         public static string host = "atxmedia.us";
         //public static string host = "localhost";
@@ -169,8 +169,10 @@ namespace MultiAssembly
 
                 GameObjects.Player = GameObject.FindFirstObjectByType<PlaneContainer>();
 
+                Console.WriteLine("Vehicle parts");
                 foreach (Transform t in GameObjects.Player.transform)
                 {
+                    Console.WriteLine(t.name);
                     string objName = TrimObjectName(t.gameObject.name);
                     vehicle.AddRange(Bytes((byte)objName.Length, objName, t.localPosition.x, t.localPosition.y, t.localPosition.z, t.localEulerAngles.x, t.localEulerAngles.y, t.localEulerAngles.z));
                     if (objName == "Body")
@@ -179,8 +181,6 @@ namespace MultiAssembly
                         var s1 = body.AppliedTransform.side1;
                         var s2 = body.AppliedTransform.side2;
                         vehicle.AddRange(Bytes(s1.radius, s2.radius, s1.lengthOffset, s2.lengthOffset, s1.roundness, s2.roundness));
-                        Console.WriteLine("Body components:");
-                        GameObjects.PrintComponents(t.gameObject);
                     }
 
                 }
@@ -218,7 +218,10 @@ namespace MultiAssembly
 
         public static void Disconnect()
         {
-            SendTCP("UREG", UUID.LocalKP.Public);
+            if (tcp.Connected)
+            {
+                SendTCP("UREG", UUID.LocalKP.Public);
+            }
 
             shutdownThreads = true;
             loopThread?.Join();

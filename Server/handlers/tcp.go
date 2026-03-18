@@ -87,7 +87,7 @@ func HandleRequest(buf *bytes.Buffer, aPlayer **player.Player, conn *net.Conn) b
 		(*aPlayer) = player.New(username, uuid, puuid)
 		(*aPlayer).Vehicle = vehicle
 
-		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid, "\n")
+		fmt.Print("Registered new player:\nUsername: ", username, "\nPrivate UUID: ", uuid, "\nPublic UUID: ", puuid, "\nVehicle size: ", len((*aPlayer).Vehicle), "\n")
 
 		for _, c := range conns {
 			err := TCPWrite(c, bit.String("REG_"), bit.String((*aPlayer).PublicUUID), []byte{byte(len((*aPlayer).Username))}, bit.String((*aPlayer).Username), (*aPlayer).Vehicle)
