@@ -44,6 +44,7 @@ func HandleConn(conn *net.Conn) {
 	conns = append(conns, conn)
 	for {
 		msgLength, ok := bit.ReadUint32(bytes.NewBuffer(bit.TCPReadExactly(conn, 4)))
+		fmt.Println("TCP Message length:", msgLength)
 		if !ok {
 			fmt.Println("TCP connection error occured")
 			Disconnect(conn, associatedPlayer)

@@ -24,7 +24,7 @@ namespace MultiAssembly
         public const int VersionInc = 1;
 
         //Set this to false for release builds
-        public const bool Ghosting = true;
+        public const bool Ghosting = false;
 
         private static TextMeshProUGUI? creditText;
         private static Canvas? menuCanvas;
