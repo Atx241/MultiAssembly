@@ -16,9 +16,9 @@ namespace MultiAssembly
         //Increment this for every major version (should only be incrememented at most every six months and only for large reworks or additions)
         public const int VersionMajor = 1;
         //Increment this for every minor version (should be incremented at most every month and only for important, but not essential reworks or additions)
-        public const int VersionMinor = 1;
+        public const int VersionMinor = 3;
         //Increment this for every patch (patches are announced changes that don't fit into the major or minor categories)
-        public const int VersionPatch = 2;
+        public const int VersionPatch = 1;
 
         //Increment this every time a non-announced/small change has been made
         public const int VersionInc = 1;
