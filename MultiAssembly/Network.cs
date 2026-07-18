@@ -255,7 +255,6 @@ namespace MultiAssembly
         }
         private static void tcpLoop()
         {
-            List<byte> buf = new List<byte>();
             while (true)
             {
                 if (shutdownThreads) return;
